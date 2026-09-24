@@ -2,11 +2,8 @@ package dev.lidless.storage;
 
 import dev.lidless.config.SortOrder;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.MultiPlayerGameMode;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
@@ -52,7 +49,7 @@ public final class StorageActions {
 
         List<Integer> clicks = SortPlanner.plan(kindOf, counts, limits, comparator(order, kinds, totals));
         for (int position : clicks) {
-            click(mc, menu, section.get(position), ContainerInput.PICKUP);
+            Clicks.pickup(mc, menu, section.get(position));
         }
     }
 
@@ -69,7 +66,7 @@ public final class StorageActions {
         for (Slot slot : player) {
             ItemStack stack = slot.getItem();
             if (!stack.isEmpty() && containsItem(stored, stack)) {
-                click(mc, menu, slot, ContainerInput.QUICK_MOVE);
+                Clicks.quickMove(mc, menu, slot);
             }
         }
     }
@@ -80,19 +77,13 @@ public final class StorageActions {
         }
         for (Slot slot : storage) {
             if (slot.hasItem()) {
-                click(mc, menu, slot, ContainerInput.QUICK_MOVE);
+                Clicks.quickMove(mc, menu, slot);
             }
         }
     }
 
     private static boolean ready(Minecraft mc, AbstractContainerMenu menu) {
         return mc.gameMode != null && mc.player != null && menu.getCarried().isEmpty();
-    }
-
-    private static void click(Minecraft mc, AbstractContainerMenu menu, Slot slot, ContainerInput input) {
-        MultiPlayerGameMode gameMode = mc.gameMode;
-        LocalPlayer player = mc.player;
-        gameMode.handleContainerInput(menu.containerId, slot.index, 0, input, player);
     }
 
     private static boolean containsItem(List<ItemStack> stacks, ItemStack stack) {

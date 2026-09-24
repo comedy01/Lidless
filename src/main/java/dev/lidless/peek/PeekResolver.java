@@ -4,7 +4,6 @@ import dev.lidless.memory.ContainerMemory;
 import dev.lidless.memory.InteractionTracker;
 import dev.lidless.memory.MemoryKeys;
 import dev.lidless.memory.Remembered;
-import dev.lidless.mixin.HorseInventoryAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.server.IntegratedServer;
@@ -17,7 +16,6 @@ import net.minecraft.world.Container;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.RandomizableContainer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.animal.equine.AbstractChestedHorse;
 import net.minecraft.world.entity.vehicle.ContainerEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -79,8 +77,7 @@ public final class PeekResolver {
     }
 
     public static PeekTarget entity(Minecraft mc, Entity entity) {
-        boolean storage = entity instanceof ContainerEntity
-                || entity instanceof AbstractChestedHorse horse && horse.hasChest();
+        boolean storage = entity instanceof ContainerEntity || Mounts.hasChest(entity);
         if (!storage) {
             return null;
         }
@@ -103,14 +100,13 @@ public final class PeekResolver {
 
     private static PeekTarget liveEntity(Entity twin, Component name, ItemStack icon) {
         if (twin instanceof ContainerEntity container) {
-            if (container.getContainerLootTable() != null) {
+            if (EntityLoot.pending(container)) {
                 return new PeekTarget(name, icon, List.of(), PeekTarget.Status.LOOT, 0L);
             }
             return new PeekTarget(name, icon, copy(container), PeekTarget.Status.LIVE, 0L);
         }
-        if (twin instanceof AbstractChestedHorse horse) {
-            Container inventory = ((HorseInventoryAccessor) horse).lidless$inventory();
-            return new PeekTarget(name, icon, copy(inventory), PeekTarget.Status.LIVE, 0L);
+        if (Mounts.isChested(twin)) {
+            return new PeekTarget(name, icon, Mounts.items(twin), PeekTarget.Status.LIVE, 0L);
         }
         return null;
     }

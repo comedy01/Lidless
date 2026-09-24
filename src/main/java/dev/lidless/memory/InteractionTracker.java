@@ -1,7 +1,7 @@
 package dev.lidless.memory;
 
 import dev.lidless.client.LidlessClient;
-import dev.lidless.mixin.MountMenuAccessor;
+import dev.lidless.peek.Mounts;
 import dev.lidless.storage.StorageSlots;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -9,10 +9,8 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.animal.equine.AbstractChestedHorse;
 import net.minecraft.world.entity.vehicle.ContainerEntity;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.AbstractMountInventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.ChestBlock;
@@ -83,9 +81,9 @@ public final class InteractionTracker {
         if (level == null) {
             return List.of();
         }
-        if (menu instanceof AbstractMountInventoryMenu mount) {
-            Entity entity = ((MountMenuAccessor) mount).lidless$mount();
-            return entity instanceof AbstractChestedHorse ? List.of(MemoryKeys.entity(entity)) : List.of();
+        if (Mounts.isMountMenu(menu)) {
+            Entity entity = Mounts.mount(menu);
+            return Mounts.isChested(entity) ? List.of(MemoryKeys.entity(entity)) : List.of();
         }
 
         long now = System.currentTimeMillis();

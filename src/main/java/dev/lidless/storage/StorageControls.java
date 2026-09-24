@@ -1,11 +1,13 @@
 package dev.lidless.storage;
 
-import dev.lidless.client.LidlessClient;
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.lidless.client.Ids;
+import dev.lidless.client.LidlessClient;
 import dev.lidless.config.LidlessConfig;
+import dev.lidless.hud.Canvas;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.SpriteIconButton;
@@ -13,10 +15,7 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -24,6 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public final class StorageControls {
     private static final int BUTTON = 12;
@@ -100,7 +100,7 @@ public final class StorageControls {
             Font font = mc.font;
             search = new EditBox(font, 0, 0, SEARCH_WIDTH, SEARCH_HEIGHT, Component.translatable("lidless.search"));
             search.setMaxLength(50);
-            search.setHint(Component.translatable("lidless.search.hint").withStyle(EditBox.SEARCH_HINT_STYLE));
+            search.setHint(Component.translatable("lidless.search.hint").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
             search.setValue(searchText);
             search.setResponder(this::onSearch);
             access.lidless$addWidget(search);
@@ -112,7 +112,7 @@ public final class StorageControls {
     private Button button(String sprite, Component label, Runnable action) {
         Button button = SpriteIconButton.builder(label, pressed -> action.run(), true)
                 .size(BUTTON, BUTTON)
-                .sprite(Identifier.fromNamespaceAndPath(LidlessClient.MOD_ID, sprite), ICON, ICON)
+                .sprite(Ids.of(sprite), ICON, ICON)
                 .build();
         button.setTooltip(Tooltip.create(label));
         access.lidless$addWidget(button);
@@ -177,13 +177,13 @@ public final class StorageControls {
         return best;
     }
 
-    public void drawOverlay(GuiGraphicsExtractor graphics) {
+    public void drawOverlay(Canvas canvas) {
         if (search == null || query.isEmpty()) {
             return;
         }
         int left = access.lidless$leftPos();
         int top = access.lidless$topPos();
-        graphics.nextStratum();
+        canvas.raise();
         for (Slot slot : menu.slots) {
             if (!slot.isActive()) {
                 continue;
@@ -191,9 +191,9 @@ public final class StorageControls {
             int x = left + slot.x;
             int y = top + slot.y;
             if (matches(slot)) {
-                graphics.outline(x - 1, y - 1, 18, 18, MATCH);
+                canvas.outline(x - 1, y - 1, 18, 18, MATCH);
             } else {
-                graphics.fill(x, y, x + 16, y + 16, DIM);
+                canvas.fill(x, y, x + 16, y + 16, DIM);
             }
         }
     }
@@ -207,20 +207,20 @@ public final class StorageControls {
         return matched.get(slot);
     }
 
-    public boolean keyPressed(KeyEvent event) {
+    public boolean keyPressed(int key, boolean control, boolean leave, Predicate<EditBox> forward) {
         if (search == null) {
             return false;
         }
         if (search.isFocused()) {
-            if (event.isEscape() || event.isConfirmation()) {
+            if (leave) {
                 search.setFocused(false);
                 screen.setFocused(null);
             } else {
-                search.keyPressed(event);
+                forward.test(search);
             }
             return true;
         }
-        if (event.key() == InputConstants.KEY_F && (event.hasControlDown() || Minecraft.getInstance().hasControlDown())) {
+        if (key == InputConstants.KEY_F && control) {
             screen.setFocused(search);
             search.setFocused(true);
             return true;
@@ -228,12 +228,12 @@ public final class StorageControls {
         return false;
     }
 
-    public boolean mouseClicked(MouseButtonEvent event) {
-        if (search != null && search.isFocused() && !search.isMouseOver(event.x(), event.y())) {
+    public boolean mouseClicked(double x, double y, int button) {
+        if (search != null && search.isFocused() && !search.isMouseOver(x, y)) {
             search.setFocused(false);
             screen.setFocused(null);
         }
-        if (event.button() != InputConstants.MOUSE_BUTTON_MIDDLE || !LidlessClient.config().middleClickSort()) {
+        if (button != InputConstants.MOUSE_BUTTON_MIDDLE || !LidlessClient.config().middleClickSort()) {
             return false;
         }
         Minecraft mc = Minecraft.getInstance();

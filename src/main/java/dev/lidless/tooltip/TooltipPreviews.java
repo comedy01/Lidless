@@ -3,6 +3,7 @@ package dev.lidless.tooltip;
 import dev.lidless.client.LidlessClient;
 import dev.lidless.peek.ItemGrid;
 import dev.lidless.peek.PeekResolver;
+import dev.lidless.storage.StoredItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
@@ -12,7 +13,6 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemContainerContents;
-import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public final class TooltipPreviews {
     }
 
     public static boolean hasContents(ItemContainerContents contents) {
-        return contents != null && contents.nonEmptyItemCopyStream().findAny().isPresent();
+        return contents != null && StoredItems.nonEmpty(contents).findAny().isPresent();
     }
 
     public static Optional<TooltipComponent> imageFor(ItemStack stack) {
@@ -48,8 +48,7 @@ public final class TooltipPreviews {
         }
         ItemContainerContents contents = stack.get(DataComponents.CONTAINER);
         if (hasContents(contents)) {
-            TooltipDisplay display = stack.getOrDefault(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT);
-            if (!display.shows(DataComponents.CONTAINER)) {
+            if (!TooltipHiding.showsContents(stack)) {
                 return Optional.empty();
             }
             boolean shulker = isShulker(stack);

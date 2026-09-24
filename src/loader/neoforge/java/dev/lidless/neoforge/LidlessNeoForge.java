@@ -1,12 +1,13 @@
 package dev.lidless.neoforge;
 
+import dev.lidless.client.Ids;
 import dev.lidless.client.LidlessClient;
 import dev.lidless.client.gui.LidlessSettingsScreen;
+import dev.lidless.hud.Canvas;
 import dev.lidless.hud.PeekHudRenderer;
 import dev.lidless.tooltip.ContainerPreview;
 import dev.lidless.tooltip.ContainerPreviewTooltip;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -29,9 +30,7 @@ public final class LidlessNeoForge {
     }
 
     private static void registerGuiLayers(RegisterGuiLayersEvent event) {
-        event.registerAboveAll(
-                Identifier.fromNamespaceAndPath(MOD_ID, "peek"),
-                PeekHudRenderer::render);
+        event.registerAboveAll(Ids.of("peek"), (graphics, deltaTracker) -> PeekHudRenderer.render(new Canvas(graphics)));
     }
 
     private static void registerTooltips(RegisterClientTooltipComponentFactoriesEvent event) {

@@ -13,4 +13,6 @@ public interface ContainerScreenAccess {
     Slot lidless$hoveredSlot();
 
     void lidless$addWidget(AbstractWidget widget);
+
+    StorageControls lidless$controls();
 }

@@ -5,8 +5,10 @@
   "compatibilityLevel": "JAVA_${java_version}",
   "client": [
     "AbstractContainerScreenMixin",
+    "ContainerScreenInputMixin",
+    "ContainerScreenRenderMixin",
+    "ContainerTooltipMixin",
     "HorseInventoryAccessor",
-    "ItemContainerContentsMixin",
     "ItemStackMixin",
     "MountMenuAccessor",
     "MultiPlayerGameModeMixin"

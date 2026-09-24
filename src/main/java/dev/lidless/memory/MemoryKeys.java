@@ -1,5 +1,6 @@
 package dev.lidless.memory;
 
+import dev.lidless.client.Ids;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
@@ -12,7 +13,7 @@ public final class MemoryKeys {
     }
 
     public static String block(ResourceKey<Level> dimension, BlockPos pos) {
-        return "block/" + dimension.identifier() + "/" + pos.getX() + "," + pos.getY() + "," + pos.getZ();
+        return "block/" + Ids.name(dimension) + "/" + pos.getX() + "," + pos.getY() + "," + pos.getZ();
     }
 
     public static String entity(Entity entity) {

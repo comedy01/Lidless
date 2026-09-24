@@ -18,6 +18,7 @@ def packs = versionProps.getProperty("packs").split(",")
 def label = versionProps.getProperty("label")
 def javaVersion = versionProps.getProperty("java").toInteger()
 def gametest = !neoforge && versionProps.getProperty("gametest", "true") == "true"
+def selfTest = neoforge || !gametest
 
 def expansions = [java_version: javaVersion]
 versionProps.stringPropertyNames().each { expansions[it] = versionProps.getProperty(it) }
@@ -45,6 +46,18 @@ sourceSets.configureEach {
 	if (gametest && it.name == "gametest") {
 		packs.each { pack ->
 			it.java.srcDir "src/compat/${pack}/gametest/java"
+		}
+	}
+}
+
+if (selfTest) {
+	sourceSets {
+		selftest {
+			java.srcDir "src/selftest/${loader}/java"
+			resources.srcDir "src/selftest/${loader}/resources"
+			packs.each { pack ->
+				java.srcDir "src/compat/${pack}/selftest/java"
+			}
 		}
 	}
 }
@@ -78,16 +91,50 @@ dependencies {
 }
 
 if (neoforge) {
+	dependencies {
+		selftestImplementation sourceSets.main.output
+	}
+
 	neoForge {
 		version = versionProps.getProperty("neoforge_version")
-		runs {
-			client {
-				client()
-			}
-		}
+		addModdingDependenciesTo(sourceSets.selftest)
 		mods {
 			lidless {
 				sourceSet sourceSets.main
+			}
+			lidless_selftest {
+				sourceSet sourceSets.selftest
+			}
+		}
+		runs {
+			client {
+				client()
+				loadedMods = [mods.lidless]
+			}
+			selftest {
+				client()
+				sourceSet = sourceSets.selftest
+				loadedMods = [mods.lidless, mods.lidless_selftest]
+			}
+		}
+	}
+} else if (selfTest) {
+	sourceSets.selftest.compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+	sourceSets.selftest.runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output
+
+	loom {
+		mods {
+			lidless {
+				sourceSet sourceSets.main
+			}
+			lidless_selftest {
+				sourceSet sourceSets.selftest
+			}
+		}
+		runs {
+			selftest {
+				client()
+				source sourceSets.selftest
 			}
 		}
 	}

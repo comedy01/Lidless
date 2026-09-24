@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.function.Consumer;
 
 @Mixin(ItemContainerContents.class)
-public abstract class ItemContainerContentsMixin {
+public abstract class ContainerTooltipMixin {
     @Inject(method = "addToTooltip", at = @At("HEAD"), cancellable = true)
     private void lidless$hideList(Item.TooltipContext context, Consumer<Component> consumer, TooltipFlag flag,
                                   DataComponentGetter components, CallbackInfo ci) {

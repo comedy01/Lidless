@@ -4,7 +4,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -58,13 +57,11 @@ public final class ItemTexts {
         List<ItemStack> inner = new ArrayList<>();
         ItemContainerContents container = stack.get(DataComponents.CONTAINER);
         if (container != null) {
-            container.nonEmptyItemCopyStream().forEach(inner::add);
+            StoredItems.nonEmpty(container).forEach(inner::add);
         }
         BundleContents bundle = stack.get(DataComponents.BUNDLE_CONTENTS);
         if (bundle != null) {
-            for (ItemStackTemplate template : bundle.items()) {
-                inner.add(template.create());
-            }
+            StoredItems.addBundle(inner, bundle);
         }
         return inner;
     }

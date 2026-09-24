@@ -1,8 +1,8 @@
 package dev.lidless.peek;
 
+import dev.lidless.hud.Canvas;
 import dev.lidless.info.Counts;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -73,16 +73,16 @@ public final class ItemGrid {
         return (cells + columns - 1) / columns;
     }
 
-    public static void draw(GuiGraphicsExtractor graphics, Font font, List<Cell> cells, int columns, int shown,
+    public static void draw(Canvas canvas, Font font, List<Cell> cells, int columns, int shown,
                             int x, int y, int slotColor) {
         for (int i = 0; i < shown && i < cells.size(); i++) {
             int cellX = x + (i % columns) * CELL;
             int cellY = y + (i / columns) * CELL;
-            graphics.fill(cellX, cellY, cellX + CELL - 1, cellY + CELL - 1, slotColor);
+            canvas.fill(cellX, cellY, cellX + CELL - 1, cellY + CELL - 1, slotColor);
             Cell cell = cells.get(i);
             if (!cell.stack().isEmpty()) {
-                graphics.item(cell.stack(), cellX + 1, cellY + 1);
-                graphics.itemDecorations(font, cell.stack(), cellX + 1, cellY + 1, cell.count());
+                canvas.item(cell.stack(), cellX + 1, cellY + 1);
+                canvas.itemDecorations(font, cell.stack(), cellX + 1, cellY + 1, cell.count());
             }
         }
     }

@@ -7,10 +7,8 @@ import dev.lidless.info.Counts;
 import dev.lidless.peek.ItemGrid;
 import dev.lidless.peek.PeekResolver;
 import dev.lidless.peek.PeekTarget;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
@@ -36,7 +34,7 @@ public final class PeekHudRenderer {
     private PeekHudRenderer() {
     }
 
-    public static void render(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
+    public static void render(Canvas canvas) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null || HudCompat.isScreenOpen(mc) || HudCompat.isGuiHidden(mc)) {
             return;
@@ -47,7 +45,7 @@ public final class PeekHudRenderer {
         }
         PeekTarget target = current(mc);
         if (target != null) {
-            draw(graphics, mc.font, target, config);
+            draw(canvas, mc.font, target, config);
         }
     }
 
@@ -61,7 +59,7 @@ public final class PeekHudRenderer {
         return cached;
     }
 
-    private static void draw(GuiGraphicsExtractor graphics, Font font, PeekTarget target, LidlessConfig config) {
+    private static void draw(Canvas canvas, Font font, PeekTarget target, LidlessConfig config) {
         boolean icon = !target.icon().isEmpty();
         Component status = statusLine(target);
 
@@ -105,34 +103,34 @@ public final class PeekHudRenderer {
 
         int boxWidth = contentWidth + PADDING * 2;
         int boxHeight = contentHeight + PADDING * 2;
-        int left = LidlessPolicy.place(config.xPosition(), graphics.guiWidth(), boxWidth);
-        int top = LidlessPolicy.place(config.yPosition(), graphics.guiHeight(), boxHeight);
+        int left = LidlessPolicy.place(config.xPosition(), canvas.width(), boxWidth);
+        int top = LidlessPolicy.place(config.yPosition(), canvas.height(), boxHeight);
 
-        graphics.fill(left, top, left + boxWidth, top + boxHeight, BORDER);
-        graphics.fill(left + 1, top + 1, left + boxWidth - 1, top + boxHeight - 1, BACKGROUND);
+        canvas.fill(left, top, left + boxWidth, top + boxHeight, BORDER);
+        canvas.fill(left + 1, top + 1, left + boxWidth - 1, top + boxHeight - 1, BACKGROUND);
 
         int x = left + PADDING;
         int y = top + PADDING;
         if (icon) {
-            graphics.item(target.icon(), x, y + (headerHeight - ICON_SIZE) / 2);
+            canvas.item(target.icon(), x, y + (headerHeight - ICON_SIZE) / 2);
         }
         int textX = x + (icon ? ICON_SIZE + ICON_GAP : 0);
         int textHeight = status == null ? LINE_HEIGHT - 1 : LINE_HEIGHT * 2 - 1;
         int textY = y + (headerHeight - textHeight) / 2;
-        graphics.text(font, target.title(), textX, textY, TITLE_COLOR, true);
+        canvas.text(font, target.title(), textX, textY, TITLE_COLOR, true);
         if (status != null) {
-            graphics.text(font, status, textX, textY + LINE_HEIGHT, STATUS_COLOR, false);
+            canvas.text(font, status, textX, textY + LINE_HEIGHT, STATUS_COLOR, false);
         }
         y += headerHeight;
 
         if (shown > 0) {
             y += SECTION_GAP;
-            ItemGrid.draw(graphics, font, cells, columns, shown, x, y, SLOT);
+            ItemGrid.draw(canvas, font, cells, columns, shown, x, y, SLOT);
             y += gridHeight;
         }
         if (note != null) {
             y += SECTION_GAP;
-            graphics.text(font, note, x, y, NOTE_COLOR, false);
+            canvas.text(font, note, x, y, NOTE_COLOR, false);
         }
     }
 

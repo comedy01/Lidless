@@ -1,9 +1,9 @@
 package dev.lidless.storage;
 
+import dev.lidless.peek.Mounts;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.AbstractMountInventoryMenu;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.DispenserMenu;
 import net.minecraft.world.inventory.HopperMenu;
@@ -27,7 +27,7 @@ public final class StorageSlots {
                 || menu instanceof ShulkerBoxMenu
                 || menu instanceof HopperMenu
                 || menu instanceof DispenserMenu
-                || menu instanceof AbstractMountInventoryMenu;
+                || Mounts.isMountMenu(menu);
     }
 
     public static List<Slot> container(AbstractContainerMenu menu) {
@@ -42,6 +42,10 @@ public final class StorageSlots {
             if (group.size() > largest.size()) {
                 largest = group;
             }
+        }
+        if (Mounts.isMountMenu(menu)) {
+            largest = new ArrayList<>(largest);
+            largest.removeIf(slot -> slot.getContainerSlot() < Mounts.FIRST_CHEST_SLOT);
         }
         return largest;
     }
