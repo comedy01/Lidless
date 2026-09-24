@@ -1,0 +1,11 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="MIT"
+
+[[mods]]
+modId="lidless_selftest"
+version="1.0.0"
+displayName="Lidless self test"
+
+[[mixins]]
+config="lidless-selftest.mixins.json"

@@ -1,0 +1,20 @@
+{
+	"schemaVersion": 1,
+	"id": "lidless-selftest",
+	"version": "1.0.0",
+	"name": "Lidless self test",
+	"description": "Development-only in-world checks for Lidless. Not shipped.",
+	"license": "MIT",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"dev.lidless.selftest.fabric.LidlessSelfTestFabric"
+		]
+	},
+	"mixins": [
+		"lidless-selftest.mixins.json"
+	],
+	"depends": {
+		"lidless": "*"
+	}
+}
