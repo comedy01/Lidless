@@ -1,0 +1,29 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "MIT"
+issueTrackerURL = "https://github.com/comedy01/Lidless/issues"
+
+[[mods]]
+    modId = "lidless"
+    version = "${version}"
+    displayName = "Lidless"
+    iconFile = "assets/lidless/icon.png"
+    description = '''See inside chests, barrels, shulker boxes, ender chests, chest boats and pack animals without opening them. Shulker boxes show their contents as a grid in item tooltips. Storage screens get a search box, sorting, deposit matching and take all. Client-side only.'''
+    authors = "comedy01"
+
+[[mixins]]
+config = "lidless.mixins.json"
+
+[[dependencies.lidless]]
+    modId = "neoforge"
+    type = "required"
+    versionRange = "${neoforge_range}"
+    ordering = "NONE"
+    side = "CLIENT"
+
+[[dependencies.lidless]]
+    modId = "minecraft"
+    type = "required"
+    versionRange = "${range}"
+    ordering = "NONE"
+    side = "CLIENT"

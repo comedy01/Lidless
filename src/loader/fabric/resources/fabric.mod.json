@@ -1,0 +1,38 @@
+{
+	"schemaVersion": 1,
+	"id": "lidless",
+	"version": "${version}",
+	"name": "Lidless",
+	"description": "See inside chests, barrels, shulker boxes, ender chests, chest boats and pack animals without opening them. Shulker boxes show their contents as a grid in item tooltips. Storage screens get a search box, sorting, deposit matching and take all. Client-side only.",
+	"icon": "assets/lidless/icon.png",
+	"authors": [
+		"comedy01"
+	],
+	"license": "MIT",
+	"contact": {
+		"homepage": "https://github.com/comedy01/Lidless",
+		"sources": "https://github.com/comedy01/Lidless",
+		"issues": "https://github.com/comedy01/Lidless/issues"
+	},
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"dev.lidless.fabric.LidlessFabric"
+		],
+		"modmenu": [
+			"dev.lidless.fabric.LidlessModMenu"
+		]
+	},
+	"mixins": [
+		"lidless.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"fabric-api": ">=${fabric_api_version}",
+		"minecraft": "${range}",
+		"java": ">=${java_version}"
+	},
+	"suggests": {
+		"modmenu": "*"
+	}
+}

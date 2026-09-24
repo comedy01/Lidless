@@ -1,0 +1,18 @@
+{
+	"schemaVersion": 1,
+	"id": "lidless-test",
+	"version": "1.0.0",
+	"name": "Lidless in-game tests",
+	"description": "Development-only client game tests for Lidless. Not shipped.",
+	"license": "MIT",
+	"environment": "client",
+	"entrypoints": {
+		"fabric-client-gametest": [
+			"dev.lidless.gametest.LidlessClientGameTest"
+		]
+	},
+	"depends": {
+		"lidless": "*",
+		"fabric-client-gametest-api-v1": "*"
+	}
+}
