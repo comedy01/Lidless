@@ -5,16 +5,11 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.JsonOps;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.ItemContainerContents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,19 +93,15 @@ public final class ContainerMemory {
         if (file == null || !Files.isRegularFile(file) || mc.level == null) {
             return;
         }
-        DynamicOps<JsonElement> ops = ops(mc.level.registryAccess());
+        MemoryCodec codec = new MemoryCodec(mc.level.registryAccess());
         try (Reader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
             JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
             for (Map.Entry<String, JsonElement> entry : root.entrySet()) {
                 JsonObject value = entry.getValue().getAsJsonObject();
-                ItemContainerContents contents = ItemContainerContents.CODEC.parse(ops, value.get("items"))
-                        .result().orElse(ItemContainerContents.EMPTY);
                 int size = value.has("size") ? value.get("size").getAsInt() : 0;
                 NonNullList<ItemStack> items = NonNullList.withSize(size, ItemStack.EMPTY);
-                contents.copyInto(items);
-                Component title = value.has("title")
-                        ? ComponentSerialization.CODEC.parse(ops, value.get("title")).result().orElse(null)
-                        : null;
+                codec.readItems(value.get("items"), items);
+                Component title = value.has("title") ? codec.readTitle(value.get("title")) : null;
                 long seen = value.has("seen") ? value.get("seen").getAsLong() : 0L;
                 entries.put(entry.getKey(), new Remembered(title, items, seen));
             }
@@ -124,18 +115,16 @@ public final class ContainerMemory {
         if (file == null || mc.level == null) {
             return;
         }
-        DynamicOps<JsonElement> ops = ops(mc.level.registryAccess());
+        MemoryCodec codec = new MemoryCodec(mc.level.registryAccess());
         JsonObject root = new JsonObject();
         for (Map.Entry<String, Remembered> entry : entries.entrySet()) {
             Remembered remembered = entry.getValue();
             JsonObject value = new JsonObject();
             value.addProperty("seen", remembered.seenAt());
             value.addProperty("size", remembered.items().size());
-            ItemContainerContents.CODEC.encodeStart(ops, ItemContainerContents.fromItems(remembered.items()))
-                    .result().ifPresent(json -> value.add("items", json));
+            codec.items(remembered.items()).ifPresent(json -> value.add("items", json));
             if (remembered.title() != null) {
-                ComponentSerialization.CODEC.encodeStart(ops, remembered.title())
-                        .result().ifPresent(json -> value.add("title", json));
+                codec.title(remembered.title()).ifPresent(json -> value.add("title", json));
             }
             root.add(entry.getKey(), value);
         }
@@ -151,9 +140,5 @@ public final class ContainerMemory {
         } catch (IOException e) {
             LOGGER.warn("Could not save container memory {}: {}", file, e.toString());
         }
-    }
-
-    private static DynamicOps<JsonElement> ops(HolderLookup.Provider registries) {
-        return registries.createSerializationContext(JsonOps.INSTANCE);
     }
 }

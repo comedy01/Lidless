@@ -1,13 +1,7 @@
 package dev.lidless.storage;
 
-import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.BundleContents;
-import net.minecraft.world.item.component.ItemContainerContents;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.ItemEnchantments;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,30 +33,13 @@ public final class ItemTexts {
         List<String> texts = new ArrayList<>(3);
         texts.add(stack.getHoverName().getString());
         texts.add(BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath());
-        addEnchantments(texts, stack.get(DataComponents.ENCHANTMENTS));
-        addEnchantments(texts, stack.get(DataComponents.STORED_ENCHANTMENTS));
+        Stacks.addEnchantments(texts, stack);
         return texts;
-    }
-
-    private static void addEnchantments(List<String> texts, ItemEnchantments enchantments) {
-        if (enchantments == null) {
-            return;
-        }
-        for (Holder<Enchantment> enchantment : enchantments.keySet()) {
-            texts.add(enchantment.value().description().getString());
-        }
     }
 
     private static List<ItemStack> contents(ItemStack stack) {
         List<ItemStack> inner = new ArrayList<>();
-        ItemContainerContents container = stack.get(DataComponents.CONTAINER);
-        if (container != null) {
-            StoredItems.nonEmpty(container).forEach(inner::add);
-        }
-        BundleContents bundle = stack.get(DataComponents.BUNDLE_CONTENTS);
-        if (bundle != null) {
-            StoredItems.addBundle(inner, bundle);
-        }
+        Stacks.addStored(inner, stack);
         return inner;
     }
 }

@@ -14,7 +14,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.Nameable;
-import net.minecraft.world.RandomizableContainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.ContainerEntity;
 import net.minecraft.world.item.ItemStack;
@@ -145,7 +144,7 @@ public final class PeekResolver {
 
         if (state.getBlock() instanceof ChestBlock chest) {
             BlockPos other = InteractionTracker.otherHalf(state, pos);
-            if (lootPending(blockEntity) || other != null && lootPending(level.getBlockEntity(other))) {
+            if (BlockLoot.pending(blockEntity) || other != null && BlockLoot.pending(level.getBlockEntity(other))) {
                 return new PeekTarget(name, icon, List.of(), PeekTarget.Status.LOOT, 0L);
             }
             Container combined = ChestBlock.getContainer(chest, state, level, pos, true);
@@ -155,14 +154,10 @@ public final class PeekResolver {
                     name = Component.translatable("container.chestDouble");
                 }
             }
-        } else if (lootPending(blockEntity)) {
+        } else if (BlockLoot.pending(blockEntity)) {
             return new PeekTarget(name, icon, List.of(), PeekTarget.Status.LOOT, 0L);
         }
         return new PeekTarget(name, icon, copy(container), PeekTarget.Status.LIVE, 0L);
-    }
-
-    private static boolean lootPending(BlockEntity blockEntity) {
-        return blockEntity instanceof RandomizableContainer randomizable && randomizable.getLootTable() != null;
     }
 
     private static PeekTarget remembered(Component name, ItemStack icon, Remembered remembered) {

@@ -2,6 +2,7 @@ package dev.lidless.peek;
 
 import dev.lidless.hud.Canvas;
 import dev.lidless.info.Counts;
+import dev.lidless.storage.Stacks;
 import net.minecraft.client.gui.Font;
 import net.minecraft.world.item.ItemStack;
 
@@ -35,7 +36,7 @@ public final class ItemGrid {
             }
             int found = -1;
             for (int i = 0; i < kinds.size(); i++) {
-                if (ItemStack.isSameItemSameComponents(kinds.get(i), stack)) {
+                if (Stacks.same(kinds.get(i), stack)) {
                     found = i;
                     break;
                 }

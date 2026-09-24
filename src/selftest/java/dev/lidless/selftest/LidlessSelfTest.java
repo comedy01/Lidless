@@ -22,7 +22,6 @@ import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
@@ -37,8 +36,6 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -166,9 +163,9 @@ public final class LidlessSelfTest {
 
     private void planChestPeek(Minecraft mc) {
         then(0, () -> run(mc, "setblock 0 -59 3 chest[facing=north]{Items:["
-                + "{Slot:0b,id:\"minecraft:diamond\",count:5},"
-                + "{Slot:4b,id:\"minecraft:cobblestone\",count:64},"
-                + "{Slot:5b,id:\"minecraft:cobblestone\",count:20}]}"));
+                + Fixtures.item(0, "diamond", 5) + ","
+                + Fixtures.item(4, "cobblestone", 64) + ","
+                + Fixtures.item(5, "cobblestone", 20) + "]}"));
         then(20, () -> {
             PeekTarget chest = PeekResolver.resolve(mc);
             check(chest != null, "no peek while looking at a chest");
@@ -192,7 +189,7 @@ public final class LidlessSelfTest {
         then(0, () -> {
             run(mc, "setblock 0 -59 3 air");
             run(mc, "setblock 0 -59 3 chest[facing=north,type=left]");
-            run(mc, "setblock 1 -59 3 chest[facing=north,type=right]{Items:[{Slot:3b,id:\"minecraft:gold_ingot\",count:9}]}");
+            run(mc, "setblock 1 -59 3 chest[facing=north,type=right]{Items:[" + Fixtures.item(3, "gold_ingot", 9) + "]}");
         });
         then(20, () -> {
             PeekTarget chest = PeekResolver.resolve(mc);
@@ -212,7 +209,8 @@ public final class LidlessSelfTest {
             PeekTarget loot = PeekResolver.resolve(mc);
             check(loot != null && loot.status() == PeekTarget.Status.LOOT, "unopened loot chest not flagged: " + describe(loot));
             run(mc, "setblock 0 -59 3 air");
-            run(mc, "setblock 0 -59 3 red_shulker_box{CustomName:\"Tools\",Items:[{Slot:13b,id:\"minecraft:iron_pickaxe\",count:1}]}");
+            run(mc, "setblock 0 -59 3 red_shulker_box{CustomName:" + Fixtures.name("Tools")
+                    + ",Items:[" + Fixtures.item(13, "iron_pickaxe", 1) + "]}");
         });
         then(20, () -> {
             PeekTarget shulker = PeekResolver.resolve(mc);
@@ -277,7 +275,7 @@ public final class LidlessSelfTest {
         then(25, () -> {
             run(mc, "kill @e[type=item]");
             run(mc, "tp @p 0 -60 0 0 30");
-            run(mc, "summon " + chestBoat() + " 0 -60 2 {Items:[{Slot:0b,id:\"minecraft:oak_log\",count:32}]}");
+            run(mc, "summon " + chestBoat() + " 0 -60 2 {Items:[" + Fixtures.item(0, "oak_log", 32) + "]}");
         });
         then(30, () -> {
             PeekTarget boat = PeekResolver.resolve(mc);
@@ -324,8 +322,7 @@ public final class LidlessSelfTest {
         contents.add(new ItemStack(Items.DIAMOND, 3));
         contents.add(ItemStack.EMPTY);
         contents.add(new ItemStack(Items.TORCH, 40));
-        ItemStack shulker = new ItemStack(Items.SHULKER_BOX);
-        shulker.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(contents));
+        ItemStack shulker = Fixtures.shulker(contents);
 
         Optional<TooltipComponent> image = shulker.getTooltipImage();
         check(image.isPresent() && image.get() instanceof ContainerPreview, "no shulker preview");
@@ -333,14 +330,14 @@ public final class LidlessSelfTest {
         check(preview.items().size() == 27, "shulker preview not 27 slots: " + preview.items().size());
         check(preview.items().get(2).is(Items.TORCH), "torches not in slot 2");
 
-        String lines = text(shulker.getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, TooltipFlag.NORMAL));
+        String lines = text(Fixtures.tooltip(mc, shulker));
         check(!lines.contains("x40"), "vanilla content list still shown: " + lines);
 
         check(new ItemStack(Items.ENDER_CHEST).getTooltipImage().isPresent(), "no ender chest preview");
 
         LidlessClient.config().setTooltipPreview(false);
         check(shulker.getTooltipImage().isEmpty(), "preview shown although switched off");
-        String plain = text(shulker.getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, TooltipFlag.NORMAL));
+        String plain = text(Fixtures.tooltip(mc, shulker));
         check(plain.contains("40"), "vanilla list missing with preview off: " + plain);
         LidlessClient.config().setTooltipPreview(true);
         log("tooltip lines: " + lines + " / off: " + plain);
@@ -349,12 +346,12 @@ public final class LidlessSelfTest {
     private void planChestScreen(Minecraft mc) {
         then(0, () -> {
             run(mc, "setblock 0 -59 3 chest[facing=north]{Items:["
-                    + "{Slot:0b,id:\"minecraft:stick\",count:10},"
-                    + "{Slot:3b,id:\"minecraft:dirt\",count:30},"
-                    + "{Slot:7b,id:\"minecraft:cobblestone\",count:50},"
-                    + "{Slot:9b,id:\"minecraft:stick\",count:20},"
-                    + "{Slot:12b,id:\"minecraft:dirt\",count:40},"
-                    + "{Slot:20b,id:\"minecraft:diamond\",count:2}]}");
+                    + Fixtures.item(0, "stick", 10) + ","
+                    + Fixtures.item(3, "dirt", 30) + ","
+                    + Fixtures.item(7, "cobblestone", 50) + ","
+                    + Fixtures.item(9, "stick", 20) + ","
+                    + Fixtures.item(12, "dirt", 40) + ","
+                    + Fixtures.item(20, "diamond", 2) + "]}");
             run(mc, "clear @p");
             run(mc, "item replace entity @p inventory.0 with minecraft:cobblestone 16");
             run(mc, "item replace entity @p inventory.1 with minecraft:torch 5");
@@ -412,10 +409,10 @@ public final class LidlessSelfTest {
 
     private void planInventoryTooltip(Minecraft mc) {
         then(5, () -> {
-            run(mc, "give @p minecraft:shulker_box[minecraft:container=["
-                    + "{slot:0,item:{id:\"minecraft:diamond\",count:3}},"
-                    + "{slot:4,item:{id:\"minecraft:golden_apple\",count:2}},"
-                    + "{slot:13,item:{id:\"minecraft:torch\",count:64}}]]");
+            run(mc, "give @p " + Fixtures.shulkerBox(
+                    Fixtures.boxItem(0, "diamond", 3),
+                    Fixtures.boxItem(4, "golden_apple", 2),
+                    Fixtures.boxItem(13, "torch", 64)));
             run(mc, "give @p minecraft:stone 9");
             run(mc, "give @p minecraft:dirt 3");
         });
@@ -446,8 +443,7 @@ public final class LidlessSelfTest {
         });
         then(5, () -> {
             screenshot(mc, "settings");
-            Screen screen = Screens.current(mc);
-            screen.mouseScrolled(screen.width / 2.0, screen.height / 2.0, 0.0, -20.0);
+            Settings.scroll(Screens.current(mc));
         });
         then(2, () -> {
             Screen screen = Screens.current(mc);
@@ -461,7 +457,7 @@ public final class LidlessSelfTest {
             Screen screen = Screens.current(mc);
             int sliders = countSliders(screen, "Vertical");
             check(sliders == 1, "reset left " + sliders + " vertical sliders on the screen");
-            screen.mouseScrolled(screen.width / 2.0, screen.height / 2.0, 0.0, -20.0);
+            Settings.scroll(screen);
         });
         then(2, () -> {
             Screen screen = Screens.current(mc);

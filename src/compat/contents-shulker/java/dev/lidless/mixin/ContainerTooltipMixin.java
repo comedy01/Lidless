@@ -1,7 +1,7 @@
 package dev.lidless.mixin;
 
+import dev.lidless.storage.Stacks;
 import dev.lidless.tooltip.TooltipPreviews;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -19,7 +19,7 @@ public abstract class ContainerTooltipMixin {
     @Inject(method = "appendHoverText", at = @At("HEAD"), cancellable = true)
     private void lidless$hideList(ItemStack stack, Item.TooltipContext context, List<Component> lines, TooltipFlag flag,
                                   CallbackInfo ci) {
-        if (TooltipPreviews.enabled() && TooltipPreviews.hasContents(stack.get(DataComponents.CONTAINER))) {
+        if (TooltipPreviews.enabled() && Stacks.hasContents(stack)) {
             ci.cancel();
         }
     }

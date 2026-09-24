@@ -97,7 +97,7 @@ public final class StorageActions {
 
     private static int indexOf(List<ItemStack> kinds, ItemStack stack) {
         for (int i = 0; i < kinds.size(); i++) {
-            if (ItemStack.isSameItemSameComponents(kinds.get(i), stack)) {
+            if (Stacks.same(kinds.get(i), stack)) {
                 return i;
             }
         }

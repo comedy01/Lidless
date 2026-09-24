@@ -9,16 +9,14 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.options.OptionsSubScreen;
 import net.minecraft.network.chat.Component;
 
-import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleFunction;
 
-public final class LidlessSettingsScreen extends OptionsSubScreen {
+public final class LidlessSettingsScreen extends OptionsPage {
     private static final int WIDTH = 150;
     private static final int HEIGHT = 20;
 
@@ -30,29 +28,29 @@ public final class LidlessSettingsScreen extends OptionsSubScreen {
     protected void addOptions() {
         LidlessConfig config = LidlessClient.config();
 
-        list.addSmall(List.of(
+        addRow(
                 toggleButton("lidless.options.peek", "lidless.options.peek.tooltip",
                         config::peek, config::setPeek),
                 toggleButton("lidless.options.require_sneak", "lidless.options.require_sneak.tooltip",
-                        config::requireSneak, config::setRequireSneak)));
+                        config::requireSneak, config::setRequireSneak));
 
-        list.addSmall(List.of(
+        addRow(
                 toggleButton("lidless.options.compact", "lidless.options.compact.tooltip",
                         config::compact, config::setCompact),
                 toggleButton("lidless.options.remember", "lidless.options.remember.tooltip",
-                        config::remember, config::setRemember)));
+                        config::remember, config::setRemember));
 
-        list.addSmall(List.of(
+        addRow(
                 toggleButton("lidless.options.tooltip_preview", "lidless.options.tooltip_preview.tooltip",
                         config::tooltipPreview, config::setTooltipPreview),
                 toggleButton("lidless.options.search_box", "lidless.options.search_box.tooltip",
-                        config::searchBox, config::setSearchBox)));
+                        config::searchBox, config::setSearchBox));
 
-        list.addSmall(List.of(
+        addRow(
                 toggleButton("lidless.options.sort_buttons", "lidless.options.sort_buttons.tooltip",
                         config::sortButtons, config::setSortButtons),
                 toggleButton("lidless.options.middle_click_sort", "lidless.options.middle_click_sort.tooltip",
-                        config::middleClickSort, config::setMiddleClickSort)));
+                        config::middleClickSort, config::setMiddleClickSort));
 
         AbstractWidget rowsSlider = new StepSlider(
                 "lidless.options.rows", "lidless.options.rows.tooltip",
@@ -60,7 +58,7 @@ public final class LidlessSettingsScreen extends OptionsSubScreen {
                 config.rows(),
                 value -> Integer.toString((int) value),
                 value -> config.setRows((int) value));
-        list.addSmall(List.of(sortOrderButton(config), rowsSlider));
+        addRow(sortOrderButton(config), rowsSlider);
 
         AbstractWidget xSlider = new StepSlider(
                 "lidless.options.x_position", "lidless.options.x_position.tooltip",
@@ -74,9 +72,9 @@ public final class LidlessSettingsScreen extends OptionsSubScreen {
                 config.yPosition(),
                 value -> (int) value + "%",
                 value -> config.setYPosition((int) value));
-        list.addSmall(List.of(xSlider, ySlider));
+        addRow(xSlider, ySlider);
 
-        list.addSmall(List.of(resetButton(config)));
+        addRow(resetButton(config));
     }
 
     @Override

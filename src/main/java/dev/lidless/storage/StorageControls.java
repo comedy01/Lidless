@@ -1,7 +1,6 @@
 package dev.lidless.storage;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.lidless.client.Ids;
 import dev.lidless.client.LidlessClient;
 import dev.lidless.config.LidlessConfig;
 import dev.lidless.hud.Canvas;
@@ -10,7 +9,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.SpriteIconButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
@@ -110,10 +108,7 @@ public final class StorageControls {
     }
 
     private Button button(String sprite, Component label, Runnable action) {
-        Button button = SpriteIconButton.builder(label, pressed -> action.run(), true)
-                .size(BUTTON, BUTTON)
-                .sprite(Ids.of(sprite), ICON, ICON)
-                .build();
+        Button button = IconButtons.create(sprite, label, pressed -> action.run(), BUTTON, ICON);
         button.setTooltip(Tooltip.create(label));
         access.lidless$addWidget(button);
         return button;
@@ -238,7 +233,7 @@ public final class StorageControls {
         }
         Minecraft mc = Minecraft.getInstance();
         Slot hovered = access.lidless$hoveredSlot();
-        if (mc.player == null || mc.player.hasInfiniteMaterials() || hovered == null) {
+        if (mc.player == null || mc.player.getAbilities().instabuild || hovered == null) {
             return false;
         }
         if (storage.contains(hovered)) {

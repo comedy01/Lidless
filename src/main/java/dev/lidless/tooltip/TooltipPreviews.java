@@ -3,16 +3,14 @@ package dev.lidless.tooltip;
 import dev.lidless.client.LidlessClient;
 import dev.lidless.peek.ItemGrid;
 import dev.lidless.peek.PeekResolver;
-import dev.lidless.storage.StoredItems;
+import dev.lidless.storage.Stacks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 
 import java.util.ArrayList;
@@ -38,21 +36,16 @@ public final class TooltipPreviews {
         return LidlessClient.config().tooltipPreview();
     }
 
-    public static boolean hasContents(ItemContainerContents contents) {
-        return contents != null && StoredItems.nonEmpty(contents).findAny().isPresent();
-    }
-
     public static Optional<TooltipComponent> imageFor(ItemStack stack) {
         if (!enabled() || stack.isEmpty()) {
             return Optional.empty();
         }
-        ItemContainerContents contents = stack.get(DataComponents.CONTAINER);
-        if (hasContents(contents)) {
+        if (Stacks.hasContents(stack)) {
             if (!TooltipHiding.showsContents(stack)) {
                 return Optional.empty();
             }
             boolean shulker = isShulker(stack);
-            return Optional.of(new ContainerPreview(items(contents, shulker ? SHULKER_SIZE : 0), shulker ? shulkerTint(stack) : CHEST_TINT));
+            return Optional.of(new ContainerPreview(items(stack, shulker ? SHULKER_SIZE : 0), shulker ? shulkerTint(stack) : CHEST_TINT));
         }
         if (stack.is(Items.ENDER_CHEST)) {
             List<ItemStack> ender = PeekResolver.enderItems(Minecraft.getInstance());
@@ -63,9 +56,9 @@ public final class TooltipPreviews {
         return Optional.empty();
     }
 
-    private static List<ItemStack> items(ItemContainerContents contents, int minimum) {
+    private static List<ItemStack> items(ItemStack stack, int minimum) {
         NonNullList<ItemStack> all = NonNullList.withSize(MAX_SLOTS, ItemStack.EMPTY);
-        contents.copyInto(all);
+        Stacks.copyContents(stack, all);
         int last = all.size() - 1;
         while (last >= 0 && all.get(last).isEmpty()) {
             last--;

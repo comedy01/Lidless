@@ -79,6 +79,17 @@ class ProjectMetadataTest {
         assertClassExists("dev.lidless.neoforge.LidlessNeoForge");
     }
 
+    @Test
+    void forgeModsToml() throws IOException {
+        assumeTrue(has("META-INF/mods.toml"));
+        String toml = resourceText("META-INF/mods.toml");
+        assertTrue(toml.contains("modId = \"lidless\""), "mods.toml must declare the lidless mod");
+        assertTrue(toml.contains("modId = \"forge\""));
+        assertFalse(toml.contains("${"), "version placeholders must be expanded");
+        assertTrue(has("pack.mcmeta"), "Forge 1.20.1 skips mod assets without pack.mcmeta");
+        assertClassExists("dev.lidless.forge.LidlessForge");
+    }
+
     private static void assertClassExists(String className) {
         String path = className.replace('.', '/') + ".class";
         assertNotNull(ProjectMetadataTest.class.getClassLoader().getResource(path), path + " must be compiled");
