@@ -7,7 +7,8 @@ issueTrackerURL = "https://github.com/comedy01/Lidless/issues"
     modId = "lidless"
     version = "${version}"
     displayName = "Lidless"
-    iconFile = "assets/lidless/icon.png"
+    logoFile = "assets/lidless/icon.png"
+    logoBlur = false
     description = '''See inside chests, barrels, shulker boxes, ender chests, chest boats and pack animals without opening them. Shulker boxes show their contents as a grid in item tooltips. Storage screens get a search box, sorting, deposit matching and take all. Client-side only.'''
     authors = "comedy01"
 
