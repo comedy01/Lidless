@@ -2,15 +2,21 @@ package dev.lidless.gametest;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.lidless.client.LidlessClient;
+import dev.lidless.client.gui.LidlessSettingsScreen;
 import dev.lidless.config.LidlessConfig;
+import dev.lidless.config.LidlessPolicy;
 import dev.lidless.peek.PeekResolver;
 import dev.lidless.peek.PeekTarget;
 import dev.lidless.tooltip.ContainerPreview;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -58,6 +64,7 @@ public class LidlessClientGameTest implements FabricClientGameTest {
             checkTooltips(context);
             checkChestScreen(context, world);
             checkInventoryTooltip(context, world);
+            checkSettingsReset(context);
         }
         log("ALL CHECKS PASSED");
     }
@@ -285,6 +292,109 @@ public class LidlessClientGameTest implements FabricClientGameTest {
                 "inventory sort button missing");
         context.setScreen(() -> null);
         context.waitTicks(3);
+    }
+
+    private static void checkSettingsReset(ClientGameTestContext context) {
+        LidlessConfig config = LidlessClient.config();
+        config.setYPosition(10);
+        context.setScreen(() -> new LidlessSettingsScreen(null, Minecraft.getInstance().options));
+        context.waitForScreen(LidlessSettingsScreen.class);
+        context.waitTicks(5);
+        log("screenshot: " + context.takeScreenshot("lidless-settings"));
+        context.getInput().setCursorPos(200.0, 200.0);
+        context.getInput().scroll(-20.0);
+        context.waitTicks(2);
+        clickSettingsButton(context, "lidless.options.reset");
+        context.waitTicks(5);
+        check(config.yPosition() == LidlessPolicy.DEFAULT_Y_POSITION, "reset did not restore the vertical position");
+        log("screenshot: " + context.takeScreenshot("lidless-settings-after-reset"));
+
+        int sliders = context.computeOnClient(client -> countSliders(Screens.current(client), "Vertical"));
+        check(sliders == 1, "reset left " + sliders + " vertical sliders on the screen");
+        dragSliderToMax(context, "Vertical");
+        context.waitTicks(5);
+        check(config.yPosition() == LidlessPolicy.MAX_POSITION, "dragging the vertical slider after reset did not change the config");
+        String shown = context.computeOnClient(client ->
+                findSlider(Screens.current(client), "Vertical").getMessage().getString());
+        check(shown.contains("100%"), "the vertical slider did not move after reset: " + shown);
+
+        context.setScreen(() -> null);
+        context.waitTicks(5);
+        config.resetToDefaults();
+        LidlessClient.saveConfig();
+    }
+
+    private static void clickSettingsButton(ClientGameTestContext context, String translationKey) {
+        double[] center = context.computeOnClient(client -> {
+            Button button = findSettingsButton(Screens.current(client), translationKey);
+            check(button != null, "no button '" + translationKey + "' on the current screen");
+            double scale = client.getWindow().getGuiScale();
+            return new double[] {
+                    (button.getX() + button.getWidth() / 2.0) * scale,
+                    (button.getY() + button.getHeight() / 2.0) * scale};
+        });
+        context.getInput().setCursorPos(center[0], center[1]);
+        context.waitTick();
+        context.getInput().pressMouse(InputConstants.MOUSE_BUTTON_LEFT);
+    }
+
+    private static void dragSliderToMax(ClientGameTestContext context, String captionText) {
+        context.getInput().setCursorPos(200.0, 200.0);
+        context.getInput().scroll(-20.0);
+        context.waitTicks(2);
+        double[] bounds = context.computeOnClient(client -> {
+            AbstractSliderButton slider = findSlider(Screens.current(client), captionText);
+            check(slider != null, "no slider '" + captionText + "' on the current screen");
+            double scale = client.getWindow().getGuiScale();
+            return new double[] {
+                    (slider.getX() + slider.getWidth() - 2.0) * scale,
+                    (slider.getY() + slider.getHeight() / 2.0) * scale};
+        });
+        context.getInput().setCursorPos(bounds[0], bounds[1]);
+        context.waitTick();
+        context.getInput().pressMouse(InputConstants.MOUSE_BUTTON_LEFT);
+    }
+
+    private static Button findSettingsButton(GuiEventListener node, String translationKey) {
+        if (node instanceof Button button
+                && button.getMessage().getContents() instanceof TranslatableContents contents
+                && contents.getKey().equals(translationKey)) {
+            return button;
+        }
+        if (node instanceof ContainerEventHandler container) {
+            for (GuiEventListener child : container.children()) {
+                Button found = findSettingsButton(child, translationKey);
+                if (found != null) {
+                    return found;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static AbstractSliderButton findSlider(GuiEventListener node, String captionText) {
+        if (node instanceof AbstractSliderButton slider && slider.getMessage().getString().contains(captionText)) {
+            return slider;
+        }
+        if (node instanceof ContainerEventHandler container) {
+            for (GuiEventListener child : container.children()) {
+                AbstractSliderButton found = findSlider(child, captionText);
+                if (found != null) {
+                    return found;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static int countSliders(GuiEventListener node, String captionText) {
+        int count = node instanceof AbstractSliderButton slider && slider.getMessage().getString().contains(captionText) ? 1 : 0;
+        if (node instanceof ContainerEventHandler container) {
+            for (GuiEventListener child : container.children()) {
+                count += countSliders(child, captionText);
+            }
+        }
+        return count;
     }
 
     private static boolean hasButton(Screen screen, String key) {

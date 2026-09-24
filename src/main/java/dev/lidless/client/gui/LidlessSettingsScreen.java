@@ -120,7 +120,7 @@ public final class LidlessSettingsScreen extends OptionsSubScreen {
     private AbstractWidget resetButton(LidlessConfig config) {
         return Button.builder(Component.translatable("lidless.options.reset"), button -> {
                     config.resetToDefaults();
-                    rebuildWidgets();
+                    ScreenOpener.open(minecraft, new LidlessSettingsScreen(lastScreen, options));
                 })
                 .width(WIDTH)
                 .build();
