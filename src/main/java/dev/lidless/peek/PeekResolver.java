@@ -81,7 +81,7 @@ public final class PeekResolver {
             return null;
         }
         Component name = entity.getDisplayName();
-        ItemStack pick = entity.getPickResult();
+        ItemStack pick = EntityLoot.pickResult(entity);
         ItemStack icon = pick == null ? ItemStack.EMPTY : pick;
 
         String key = MemoryKeys.entity(entity);

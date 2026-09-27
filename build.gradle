@@ -244,6 +244,33 @@ jar {
 	}
 }
 
+if (fabric && !remap && project.findProperty("ec.showcase") != null) {
+	sourceSets {
+		showcase
+	}
+	sourceSets.showcase.compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+	sourceSets.showcase.runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output
+
+	loom {
+		mods {
+			lidless {
+				sourceSet sourceSets.main
+			}
+			lidless_showcase {
+				sourceSet sourceSets.showcase
+			}
+		}
+		runs {
+			showcase {
+				client()
+				source sourceSets.showcase
+				programArgs "--width", "1920", "--height", "1080", "--username", "Lidless"
+				vmArgs(["-Xmx2G"] + project.properties.findAll { it.key.startsWith("ec.") }.collect { "-Dlidless.${it.key.substring(3)}=${it.value}" })
+			}
+		}
+	}
+}
+
 if (gametest) {
 	fabricApi {
 		configureTests {
@@ -252,5 +279,11 @@ if (gametest) {
 			enableGameTests = false
 			enableClientGameTests = true
 		}
+	}
+}
+
+if (gametest && project.hasProperty("showcase")) {
+	tasks.matching { it.name == "runClientGameTest" }.configureEach {
+		jvmArgs "-Dlidless.showcase=true", "-Dlidless.showcase.dir=${layout.buildDirectory.dir('showcase/raw').get().asFile}"
 	}
 }

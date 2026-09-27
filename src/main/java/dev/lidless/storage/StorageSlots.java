@@ -45,7 +45,7 @@ public final class StorageSlots {
         }
         if (Mounts.isMountMenu(menu)) {
             largest = new ArrayList<>(largest);
-            largest.removeIf(slot -> slot.getContainerSlot() < Mounts.FIRST_CHEST_SLOT);
+            largest.removeIf(slot -> Clicks.containerSlot(slot) < Mounts.FIRST_CHEST_SLOT);
         }
         return largest;
     }
@@ -54,7 +54,7 @@ public final class StorageSlots {
         List<Slot> slots = new ArrayList<>(MAIN_END - HOTBAR_SIZE);
         for (Slot slot : menu.slots) {
             if (slot.container instanceof Inventory) {
-                int index = slot.getContainerSlot();
+                int index = Clicks.containerSlot(slot);
                 if (index >= HOTBAR_SIZE && index < MAIN_END) {
                     slots.add(slot);
                 }

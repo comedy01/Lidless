@@ -1,10 +1,16 @@
 package dev.lidless.selftest;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.lidless.selftest.mixin.MouseHandlerMixin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 
 final class Ui {
+    static final int KEY_E = InputConstants.KEY_E;
+    static final int KEY_F = InputConstants.KEY_F;
+    static final int KEY_ESCAPE = InputConstants.KEY_ESCAPE;
+    static final int MOD_CONTROL = InputConstants.MOD_CONTROL;
+
     private Ui() {
     }
 

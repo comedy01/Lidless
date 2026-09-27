@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
@@ -16,6 +17,10 @@ import java.util.List;
 import java.util.Optional;
 
 final class MemoryCodec {
+    static MemoryCodec create(Minecraft mc) {
+        return new MemoryCodec(mc.level.registryAccess());
+    }
+
     MemoryCodec(RegistryAccess registries) {
     }
 

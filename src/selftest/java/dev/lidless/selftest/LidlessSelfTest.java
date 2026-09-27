@@ -1,17 +1,15 @@
 package dev.lidless.selftest;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import dev.lidless.client.GameRegistries;
 import dev.lidless.client.LidlessClient;
-import dev.lidless.client.gui.Widgets;
 import dev.lidless.client.gui.LidlessSettingsScreen;
+import dev.lidless.client.gui.Widgets;
 import dev.lidless.config.LidlessConfig;
 import dev.lidless.config.LidlessPolicy;
 import dev.lidless.peek.PeekResolver;
 import dev.lidless.peek.PeekTarget;
 import dev.lidless.tooltip.ContainerPreview;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -31,7 +29,6 @@ import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -51,7 +48,6 @@ import java.util.function.BooleanSupplier;
 import java.util.stream.Stream;
 
 public final class LidlessSelfTest {
-    private static final BlockPos FRONT = new BlockPos(0, -59, 3);
     private static final int TIMEOUT = 2400;
 
     private final List<Step> steps = new ArrayList<>();
@@ -61,6 +57,7 @@ public final class LidlessSelfTest {
     private int index;
     private int delay;
     private int waited;
+    private int floor;
 
     private record Step(int delay, BooleanSupplier ready, Runnable action) {
     }
@@ -143,11 +140,14 @@ public final class LidlessSelfTest {
 
     private void plan(Minecraft mc) {
         when(() -> mc.level != null && mc.player != null && Screens.current(mc) == null
-                && mc.getSingleplayerServer() != null, () -> log("world loaded"));
+                && mc.getSingleplayerServer() != null, () -> {
+            floor = (int) Math.floor(mc.player.getY());
+            log("world loaded, floor " + floor);
+        });
         then(40, () -> {
             LidlessClient.config().resetToDefaults();
             run(mc, "gamemode survival @p");
-            run(mc, "tp @p 0 -60 0 0 0");
+            run(mc, "tp @p 0 " + floor + " 0 0 0");
         });
         planChestPeek(mc);
         planDoubleChest(mc);
@@ -161,7 +161,7 @@ public final class LidlessSelfTest {
     }
 
     private void planChestPeek(Minecraft mc) {
-        then(0, () -> run(mc, "setblock 0 -59 3 chest[facing=north]{Items:["
+        then(0, () -> run(mc, "setblock 0 " + (floor + 1) + " 3 chest[facing=north]{Items:["
                 + Fixtures.item(0, "diamond", 5) + ","
                 + Fixtures.item(4, "cobblestone", 64) + ","
                 + Fixtures.item(5, "cobblestone", 20) + "]}"));
@@ -171,7 +171,7 @@ public final class LidlessSelfTest {
             log("chest: " + describe(chest));
             check(chest.status() == PeekTarget.Status.LIVE, "chest not read live: " + chest.status());
             check(chest.items().size() == 27, "wrong chest size: " + chest.items().size());
-            check(chest.items().get(0).is(Items.DIAMOND) && chest.items().get(0).getCount() == 5, "diamonds missing");
+            check(chest.items().get(0).getItem() == Items.DIAMOND && chest.items().get(0).getCount() == 5, "diamonds missing");
             check(chest.title().getString().equals("Chest"), "wrong title: " + chest.title().getString());
             screenshot(mc, "peek-chest");
             LidlessClient.config().setCompact(false);
@@ -179,16 +179,16 @@ public final class LidlessSelfTest {
         then(3, () -> {
             screenshot(mc, "peek-chest-slots");
             LidlessClient.config().setCompact(true);
-            run(mc, "setblock 0 -59 3 stone");
+            run(mc, "setblock 0 " + (floor + 1) + " 3 stone");
         });
         then(10, () -> check(PeekResolver.resolve(mc) == null, "peek shown for a plain block"));
     }
 
     private void planDoubleChest(Minecraft mc) {
         then(0, () -> {
-            run(mc, "setblock 0 -59 3 air");
-            run(mc, "setblock 0 -59 3 chest[facing=north,type=left]");
-            run(mc, "setblock 1 -59 3 chest[facing=north,type=right]{Items:[" + Fixtures.item(3, "gold_ingot", 9) + "]}");
+            run(mc, "setblock 0 " + (floor + 1) + " 3 air");
+            run(mc, "setblock 0 " + (floor + 1) + " 3 chest[facing=north,type=left]");
+            run(mc, "setblock 1 " + (floor + 1) + " 3 chest[facing=north,type=right]{Items:[" + Fixtures.item(3, "gold_ingot", 9) + "]}");
         });
         then(20, () -> {
             PeekTarget chest = PeekResolver.resolve(mc);
@@ -197,18 +197,18 @@ public final class LidlessSelfTest {
             check(chest.items().size() == 54, "double chest not combined: " + chest.items().size());
             check(chest.title().getString().equals("Large Chest"), "wrong double chest title: " + chest.title().getString());
             check(countOf(chest.items(), Items.GOLD_INGOT) == 9, "gold from the other half missing");
-            run(mc, "setblock 1 -59 3 air");
-            run(mc, "setblock 0 -59 3 air");
+            run(mc, "setblock 1 " + (floor + 1) + " 3 air");
+            run(mc, "setblock 0 " + (floor + 1) + " 3 air");
         });
     }
 
     private void planLootAndShulker(Minecraft mc) {
-        then(5, () -> run(mc, "setblock 0 -59 3 chest[facing=north]{LootTable:\"minecraft:chests/simple_dungeon\"}"));
+        then(5, () -> run(mc, "setblock 0 " + (floor + 1) + " 3 chest[facing=north]{LootTable:\"minecraft:chests/simple_dungeon\"}"));
         then(20, () -> {
             PeekTarget loot = PeekResolver.resolve(mc);
             check(loot != null && loot.status() == PeekTarget.Status.LOOT, "unopened loot chest not flagged: " + describe(loot));
-            run(mc, "setblock 0 -59 3 air");
-            run(mc, "setblock 0 -59 3 red_shulker_box{CustomName:" + Fixtures.name("Tools")
+            run(mc, "setblock 0 " + (floor + 1) + " 3 air");
+            run(mc, "setblock 0 " + (floor + 1) + " 3 red_shulker_box{CustomName:" + Fixtures.name("Tools")
                     + ",Items:[" + Fixtures.item(13, "iron_pickaxe", 1) + "]}");
         });
         then(20, () -> {
@@ -216,29 +216,29 @@ public final class LidlessSelfTest {
             log("shulker: " + describe(shulker));
             check(shulker != null && shulker.items().size() == 27, "shulker box not read: " + describe(shulker));
             check(shulker.title().getString().equals("Tools"), "custom name not used: " + shulker.title().getString());
-            check(shulker.items().get(13).is(Items.IRON_PICKAXE), "pickaxe not in slot 13");
-            run(mc, "setblock 0 -59 3 air");
+            check(shulker.items().get(13).getItem() == Items.IRON_PICKAXE, "pickaxe not in slot 13");
+            run(mc, "setblock 0 " + (floor + 1) + " 3 air");
         });
     }
 
     private void planEnderChest(Minecraft mc) {
         then(5, () -> {
             run(mc, "item replace entity @p enderchest.0 with minecraft:emerald 7");
-            run(mc, "setblock 0 -59 3 ender_chest[facing=north]");
+            run(mc, "setblock 0 " + (floor + 1) + " 3 ender_chest[facing=north]");
         });
         then(20, () -> {
             PeekTarget ender = PeekResolver.resolve(mc);
             log("ender chest: " + describe(ender));
             check(ender != null && countOf(ender.items(), Items.EMERALD) == 7, "ender chest contents missing");
             screenshot(mc, "peek-ender");
-            run(mc, "setblock 0 -59 3 air");
+            run(mc, "setblock 0 " + (floor + 1) + " 3 air");
         });
     }
 
     private void planMounts(Minecraft mc) {
         then(5, () -> {
-            run(mc, "tp @p 0 -60 0 0 20");
-            run(mc, "summon donkey 0 -60 3 {NoAI:1b,Tame:1b,ChestedHorse:1b,Rotation:[90f,0f]}");
+            run(mc, "tp @p 0 " + floor + " 0 0 20");
+            run(mc, "summon donkey 0 " + floor + " 3 {NoAI:1b,Tame:1b,ChestedHorse:1b,Rotation:[90f,0f]}");
         });
         then(5, () -> {
             run(mc, "item replace entity @e[type=donkey] horse.0 with minecraft:apple 3");
@@ -273,8 +273,8 @@ public final class LidlessSelfTest {
         });
         then(25, () -> {
             run(mc, "kill @e[type=item]");
-            run(mc, "tp @p 0 -60 0 0 30");
-            run(mc, "summon " + chestBoat() + " 0 -60 2 {Items:[" + Fixtures.item(0, "oak_log", 32) + "]}");
+            run(mc, "tp @p 0 " + floor + " 0 0 30");
+            run(mc, "summon " + chestBoat() + " 0 " + floor + " 2 {Items:[" + Fixtures.item(0, "oak_log", 32) + "]}");
         });
         then(30, () -> {
             PeekTarget boat = PeekResolver.resolve(mc);
@@ -282,7 +282,7 @@ public final class LidlessSelfTest {
             check(boat != null && countOf(boat.items(), Items.OAK_LOG) == 32, "chest boat not peeked");
             run(mc, "kill @e[type=" + chestBoat() + "]");
             run(mc, "kill @e[type=item]");
-            run(mc, "tp @p 0 -60 0 0 0");
+            run(mc, "tp @p 0 " + floor + " 0 0 0");
         });
     }
 
@@ -310,9 +310,9 @@ public final class LidlessSelfTest {
 
     private static int carried(Minecraft mc, Item item) {
         int total = 0;
-        for (int i = 0; i < mc.player.getInventory().getContainerSize(); i++) {
-            ItemStack stack = mc.player.getInventory().getItem(i);
-            if (stack.is(item)) {
+        for (int i = 0; i < ServerCompat.inventory(mc.player).getContainerSize(); i++) {
+            ItemStack stack = ServerCompat.inventory(mc.player).getItem(i);
+            if (stack.getItem() == item) {
                 total += stack.getCount();
             }
         }
@@ -326,19 +326,19 @@ public final class LidlessSelfTest {
         contents.add(new ItemStack(Items.TORCH, 40));
         ItemStack shulker = Fixtures.shulker(contents);
 
-        Optional<TooltipComponent> image = shulker.getTooltipImage();
+        Optional<?> image = ServerCompat.tooltipImage(shulker);
         check(image.isPresent() && image.get() instanceof ContainerPreview, "no shulker preview");
         ContainerPreview preview = (ContainerPreview) image.get();
         check(preview.items().size() == 27, "shulker preview not 27 slots: " + preview.items().size());
-        check(preview.items().get(2).is(Items.TORCH), "torches not in slot 2");
+        check(preview.items().get(2).getItem() == Items.TORCH, "torches not in slot 2");
 
         String lines = text(Fixtures.tooltip(mc, shulker));
         check(!lines.contains("x40"), "vanilla content list still shown: " + lines);
 
-        check(new ItemStack(Items.ENDER_CHEST).getTooltipImage().isPresent(), "no ender chest preview");
+        check(ServerCompat.tooltipImage(new ItemStack(Items.ENDER_CHEST)).isPresent(), "no ender chest preview");
 
         LidlessClient.config().setTooltipPreview(false);
-        check(shulker.getTooltipImage().isEmpty(), "preview shown although switched off");
+        check(!ServerCompat.tooltipImage(shulker).isPresent(), "preview shown although switched off");
         String plain = text(Fixtures.tooltip(mc, shulker));
         check(plain.contains("40"), "vanilla list missing with preview off: " + plain);
         LidlessClient.config().setTooltipPreview(true);
@@ -347,7 +347,7 @@ public final class LidlessSelfTest {
 
     private void planChestScreen(Minecraft mc) {
         then(0, () -> {
-            run(mc, "setblock 0 -59 3 chest[facing=north]{Items:["
+            run(mc, "setblock 0 " + (floor + 1) + " 3 chest[facing=north]{Items:["
                     + Fixtures.item(0, "stick", 10) + ","
                     + Fixtures.item(3, "dirt", 30) + ","
                     + Fixtures.item(7, "cobblestone", 50) + ","
@@ -372,12 +372,12 @@ public final class LidlessSelfTest {
             log("after sort: " + sorted);
             check(sorted.equals(expectedSort()), "unexpected sort result: " + sorted);
             Screen screen = Screens.current(mc);
-            Ui.key(screen, InputConstants.KEY_F, InputConstants.MOD_CONTROL);
+            Ui.key(screen, Ui.KEY_F, Ui.MOD_CONTROL);
             check(searchBox(screen).isFocused(), "ctrl+f did not focus the search box");
             for (char c : "stone".toCharArray()) {
                 searchBox(screen).insertText(String.valueOf(c));
             }
-            Ui.key(screen, InputConstants.KEY_E, 0);
+            Ui.key(screen, Ui.KEY_E, 0);
         });
         then(3, () -> {
             Screen screen = Screens.current(mc);
@@ -385,7 +385,7 @@ public final class LidlessSelfTest {
             String typed = searchBox(screen).getValue();
             check(typed.equals("stone"), "search box did not receive text: " + typed);
             screenshot(mc, "chest-search");
-            Ui.key(screen, InputConstants.KEY_ESCAPE, 0);
+            Ui.key(screen, Ui.KEY_ESCAPE, 0);
         });
         then(2, () -> {
             check(Screens.current(mc) instanceof ContainerScreen, "escape closed the chest instead of leaving the search box");
@@ -404,7 +404,7 @@ public final class LidlessSelfTest {
             Screens.open(mc, null);
         });
         then(5, () -> {
-            run(mc, "setblock 0 -59 3 air");
+            run(mc, "setblock 0 " + (floor + 1) + " 3 air");
             run(mc, "clear @p");
         });
     }
@@ -423,7 +423,7 @@ public final class LidlessSelfTest {
             AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) Screens.current(mc);
             Slot target = null;
             for (Slot slot : screen.getMenu().slots) {
-                if (slot.getItem().is(Items.SHULKER_BOX)) {
+                if (slot.getItem().getItem() == Items.SHULKER_BOX) {
                     target = slot;
                 }
             }
@@ -486,8 +486,7 @@ public final class LidlessSelfTest {
 
     private static void screenshot(Minecraft mc, String name) {
         log("screenshot: " + name);
-        Screenshot.grab(mc.gameDirectory, Screens.renderTarget(mc), message -> {
-        });
+        ServerCompat.screenshot(mc, Screens.renderTarget(mc));
     }
 
     private static void clickButton(Minecraft mc, String key) {
@@ -578,11 +577,11 @@ public final class LidlessSelfTest {
         return GameRegistries.itemPath(item);
     }
 
-    private static List<String> serverContents(Minecraft mc) {
+    private List<String> serverContents(Minecraft mc) {
         IntegratedServer server = mc.getSingleplayerServer();
         return server.submit(() -> {
             ServerLevel level = server.getLevel(Level.OVERWORLD);
-            Container chest = (Container) level.getBlockEntity(FRONT);
+            Container chest = (Container) level.getBlockEntity(new BlockPos(0, floor + 1, 3));
             List<String> out = new ArrayList<>();
             for (int i = 0; i < chest.getContainerSize(); i++) {
                 ItemStack stack = chest.getItem(i);
@@ -608,7 +607,7 @@ public final class LidlessSelfTest {
     private static int countOf(List<ItemStack> items, Item item) {
         int total = 0;
         for (ItemStack stack : items) {
-            if (stack.is(item)) {
+            if (stack.getItem() == item) {
                 total += stack.getCount();
             }
         }

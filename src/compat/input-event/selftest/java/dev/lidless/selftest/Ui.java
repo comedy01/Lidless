@@ -9,6 +9,11 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 
 final class Ui {
+    static final int KEY_E = InputConstants.KEY_E;
+    static final int KEY_F = InputConstants.KEY_F;
+    static final int KEY_ESCAPE = InputConstants.KEY_ESCAPE;
+    static final int MOD_CONTROL = InputConstants.MOD_CONTROL;
+
     private Ui() {
     }
 

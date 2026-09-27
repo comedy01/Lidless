@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.google.gson.annotations.SerializedName;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -18,7 +18,7 @@ import java.nio.file.StandardCopyOption;
 public final class LidlessConfig {
     public static final String FILE_NAME = "lidless.json";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("lidless");
+    private static final Logger LOGGER = LogManager.getLogger("lidless");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     @SerializedName("peek")
@@ -205,7 +205,7 @@ public final class LidlessConfig {
             Files.createDirectories(parent);
         }
         Path temp = absolute.resolveSibling(absolute.getFileName() + ".tmp");
-        Files.writeString(temp, GSON.toJson(this) + System.lineSeparator(), StandardCharsets.UTF_8);
+        Files.write(temp, (GSON.toJson(this) + System.lineSeparator()).getBytes(StandardCharsets.UTF_8));
         try {
             Files.move(temp, absolute, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
         } catch (AtomicMoveNotSupportedException e) {

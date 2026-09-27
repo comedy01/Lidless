@@ -85,12 +85,12 @@ public final class StorageActions {
     }
 
     private static boolean ready(Minecraft mc, AbstractContainerMenu menu) {
-        return mc.gameMode != null && mc.player != null && menu.getCarried().isEmpty();
+        return mc.gameMode != null && mc.player != null && Clicks.carried(mc, menu).isEmpty();
     }
 
     private static boolean containsItem(List<ItemStack> stacks, ItemStack stack) {
         for (ItemStack other : stacks) {
-            if (other.is(stack.getItem())) {
+            if (other.getItem() == stack.getItem()) {
                 return true;
             }
         }

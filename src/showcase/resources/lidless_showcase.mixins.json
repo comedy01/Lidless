@@ -1,0 +1,15 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "dev.lidless.showcase.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"client": [
+		"GameRendererHandMixin",
+		"MinecraftFrameMixin",
+		"MouseHandlerAccessor",
+		"ScreenCursorMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

@@ -3,6 +3,7 @@ package dev.lidless.memory;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
@@ -15,6 +16,10 @@ import java.util.Optional;
 
 final class MemoryCodec {
     private final DynamicOps<JsonElement> ops;
+
+    static MemoryCodec create(Minecraft mc) {
+        return new MemoryCodec(mc.level.registryAccess());
+    }
 
     MemoryCodec(HolderLookup.Provider registries) {
         this.ops = registries.createSerializationContext(JsonOps.INSTANCE);

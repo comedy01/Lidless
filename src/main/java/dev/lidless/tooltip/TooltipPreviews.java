@@ -6,7 +6,6 @@ import dev.lidless.peek.PeekResolver;
 import dev.lidless.storage.Stacks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.NonNullList;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
@@ -36,7 +35,7 @@ public final class TooltipPreviews {
         return LidlessClient.config().tooltipPreview();
     }
 
-    public static Optional<TooltipComponent> imageFor(ItemStack stack) {
+    public static Optional<ContainerPreview> imageFor(ItemStack stack) {
         if (!enabled() || stack.isEmpty()) {
             return Optional.empty();
         }
@@ -47,7 +46,7 @@ public final class TooltipPreviews {
             boolean shulker = isShulker(stack);
             return Optional.of(new ContainerPreview(items(stack, shulker ? SHULKER_SIZE : 0), shulker ? shulkerTint(stack) : CHEST_TINT));
         }
-        if (stack.is(Items.ENDER_CHEST)) {
+        if (stack.getItem() == Items.ENDER_CHEST) {
             List<ItemStack> ender = PeekResolver.enderItems(Minecraft.getInstance());
             if (ender != null && !ItemGrid.isEmpty(ender)) {
                 return Optional.of(new ContainerPreview(ender, ENDER_TINT));

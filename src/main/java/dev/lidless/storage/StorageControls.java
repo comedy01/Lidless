@@ -1,6 +1,5 @@
 package dev.lidless.storage;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import dev.lidless.client.LidlessClient;
 import dev.lidless.client.Texts;
 import dev.lidless.client.gui.Widgets;
@@ -215,7 +214,7 @@ public final class StorageControls {
             }
             return true;
         }
-        if (key == InputConstants.KEY_F && control) {
+        if (key == Keys.F && control) {
             screen.setFocused(search);
             Widgets.focus(search, true);
             return true;
@@ -228,12 +227,12 @@ public final class StorageControls {
             Widgets.focus(search, false);
             screen.setFocused(null);
         }
-        if (button != InputConstants.MOUSE_BUTTON_MIDDLE || !LidlessClient.config().middleClickSort()) {
+        if (button != Keys.MOUSE_MIDDLE || !LidlessClient.config().middleClickSort()) {
             return false;
         }
         Minecraft mc = Minecraft.getInstance();
         Slot hovered = access.lidless$hoveredSlot();
-        if (mc.player == null || mc.player.getAbilities().instabuild || hovered == null) {
+        if (mc.player == null || Clicks.instabuild(mc.player) || hovered == null) {
             return false;
         }
         if (storage.contains(hovered)) {

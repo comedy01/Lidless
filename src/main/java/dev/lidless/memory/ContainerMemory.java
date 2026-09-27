@@ -4,14 +4,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -25,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class ContainerMemory {
-    private static final Logger LOGGER = LoggerFactory.getLogger("lidless");
+    private static final Logger LOGGER = LogManager.getLogger("lidless");
     private static final Gson GSON = new GsonBuilder().create();
 
     private static Path directory;
@@ -93,9 +92,9 @@ public final class ContainerMemory {
         if (file == null || !Files.isRegularFile(file) || mc.level == null) {
             return;
         }
-        MemoryCodec codec = new MemoryCodec(mc.level.registryAccess());
+        MemoryCodec codec = MemoryCodec.create(mc);
         try (Reader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
-            JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
+            JsonObject root = GSON.fromJson(reader, JsonObject.class);
             for (Map.Entry<String, JsonElement> entry : root.entrySet()) {
                 JsonObject value = entry.getValue().getAsJsonObject();
                 int size = value.has("size") ? value.get("size").getAsInt() : 0;
@@ -115,7 +114,7 @@ public final class ContainerMemory {
         if (file == null || mc.level == null) {
             return;
         }
-        MemoryCodec codec = new MemoryCodec(mc.level.registryAccess());
+        MemoryCodec codec = MemoryCodec.create(mc);
         JsonObject root = new JsonObject();
         for (Map.Entry<String, Remembered> entry : entries.entrySet()) {
             Remembered remembered = entry.getValue();
@@ -131,7 +130,7 @@ public final class ContainerMemory {
         try {
             Files.createDirectories(file.getParent());
             Path temp = file.resolveSibling(file.getFileName() + ".tmp");
-            Files.writeString(temp, GSON.toJson(root), StandardCharsets.UTF_8);
+            Files.write(temp, GSON.toJson(root).getBytes(StandardCharsets.UTF_8));
             try {
                 Files.move(temp, file, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
             } catch (AtomicMoveNotSupportedException e) {

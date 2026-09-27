@@ -14,7 +14,7 @@ import java.util.Optional;
 public abstract class ItemStackMixin {
     @Inject(method = "getTooltipImage", at = @At("HEAD"), cancellable = true)
     private void lidless$preview(CallbackInfoReturnable<Optional<TooltipComponent>> cir) {
-        Optional<TooltipComponent> preview = TooltipPreviews.imageFor((ItemStack) (Object) this);
+        Optional<TooltipComponent> preview = TooltipPreviews.imageFor((ItemStack) (Object) this).map(TooltipComponent.class::cast);
         if (preview.isPresent()) {
             cir.setReturnValue(preview);
         }
