@@ -1,5 +1,6 @@
 package dev.lidless.storage;
 
+import dev.lidless.client.Texts;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -44,7 +45,7 @@ public final class Stacks {
 
     static void addEnchantments(List<String> texts, ItemStack stack) {
         for (Enchantment enchantment : EnchantmentHelper.getEnchantments(stack).keySet()) {
-            texts.add(Component.translatable(enchantment.getDescriptionId()).getString());
+            texts.add(Texts.translatable(enchantment.getDescriptionId()).getString());
         }
     }
 

@@ -1,5 +1,6 @@
 package dev.lidless.peek;
 
+import dev.lidless.client.Texts;
 import dev.lidless.memory.ContainerMemory;
 import dev.lidless.memory.InteractionTracker;
 import dev.lidless.memory.MemoryKeys;
@@ -15,7 +16,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.vehicle.ContainerEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.ChestBlock;
@@ -76,7 +76,7 @@ public final class PeekResolver {
     }
 
     public static PeekTarget entity(Minecraft mc, Entity entity) {
-        boolean storage = entity instanceof ContainerEntity || Mounts.hasChest(entity);
+        boolean storage = EntityLoot.container(entity) != null || Mounts.hasChest(entity);
         if (!storage) {
             return null;
         }
@@ -98,8 +98,9 @@ public final class PeekResolver {
     }
 
     private static PeekTarget liveEntity(Entity twin, Component name, ItemStack icon) {
-        if (twin instanceof ContainerEntity container) {
-            if (EntityLoot.pending(container)) {
+        Container container = EntityLoot.container(twin);
+        if (container != null) {
+            if (EntityLoot.pending(twin)) {
                 return new PeekTarget(name, icon, List.of(), PeekTarget.Status.LOOT, 0L);
             }
             return new PeekTarget(name, icon, copy(container), PeekTarget.Status.LIVE, 0L);
@@ -151,7 +152,7 @@ public final class PeekResolver {
             if (combined != null) {
                 container = combined;
                 if (other != null && name.equals(state.getBlock().getName())) {
-                    name = Component.translatable("container.chestDouble");
+                    name = Texts.translatable("container.chestDouble");
                 }
             }
         } else if (BlockLoot.pending(blockEntity)) {

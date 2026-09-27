@@ -41,6 +41,19 @@ final class Fixtures {
     }
 
     static List<Component> tooltip(Minecraft mc, ItemStack stack) {
-        return stack.getTooltipLines(mc.player, TooltipFlag.NORMAL);
+        return stack.getTooltipLines(mc.player, normalFlag());
+    }
+
+    // NORMAL moved from TooltipFlag.Default to TooltipFlag in 1.19.3; the self-test only runs in dev.
+    private static TooltipFlag normalFlag() {
+        try {
+            try {
+                return (TooltipFlag) TooltipFlag.class.getField("NORMAL").get(null);
+            } catch (NoSuchFieldException e) {
+                return (TooltipFlag) Class.forName(TooltipFlag.class.getName() + "$Default").getField("NORMAL").get(null);
+            }
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

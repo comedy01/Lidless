@@ -1,6 +1,7 @@
 package dev.lidless.memory;
 
 import dev.lidless.client.LidlessClient;
+import dev.lidless.peek.EntityLoot;
 import dev.lidless.peek.Mounts;
 import dev.lidless.storage.StorageSlots;
 import net.minecraft.client.Minecraft;
@@ -9,7 +10,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.vehicle.ContainerEntity;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -90,7 +90,7 @@ public final class InteractionTracker {
         boolean entityRecent = lastEntity != null && now - lastEntityTime < BIND_WINDOW_MS;
         boolean blockRecent = lastBlock != null && now - lastBlockTime < BIND_WINDOW_MS;
         if (entityRecent && (!blockRecent || lastEntityTime >= lastBlockTime)) {
-            return lastEntity instanceof ContainerEntity ? List.of(MemoryKeys.entity(lastEntity)) : List.of();
+            return EntityLoot.container(lastEntity) != null ? List.of(MemoryKeys.entity(lastEntity)) : List.of();
         }
         if (!blockRecent) {
             return List.of();

@@ -4,6 +4,7 @@ import dev.lidless.client.Ids;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -12,7 +13,9 @@ final class IconButtons {
     }
 
     static Button create(String sprite, Component label, Button.OnPress onPress, int size, int icon) {
-        return new IconButton(Ids.of("textures/gui/sprites/" + sprite + ".png"), label, onPress, size, icon);
+        Button button = new IconButton(Ids.of("textures/gui/sprites/" + sprite + ".png"), label, onPress, size, icon);
+        button.setTooltip(Tooltip.create(label));
+        return button;
     }
 
     private static final class IconButton extends Button {

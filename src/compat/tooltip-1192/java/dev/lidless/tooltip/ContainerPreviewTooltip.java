@@ -1,0 +1,30 @@
+package dev.lidless.tooltip;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+import dev.lidless.hud.Canvas;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+
+public final class ContainerPreviewTooltip implements ClientTooltipComponent {
+    private final PreviewPanel panel;
+
+    public ContainerPreviewTooltip(ContainerPreview preview) {
+        this.panel = new PreviewPanel(preview);
+    }
+
+    @Override
+    public int getHeight() {
+        return panel.height();
+    }
+
+    @Override
+    public int getWidth(Font font) {
+        return panel.width();
+    }
+
+    @Override
+    public void renderImage(Font font, int x, int y, PoseStack poseStack, ItemRenderer itemRenderer, int blitOffset) {
+        panel.draw(new Canvas(poseStack, blitOffset), font, x, y);
+    }
+}

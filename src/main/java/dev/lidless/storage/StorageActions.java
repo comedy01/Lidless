@@ -2,7 +2,7 @@ package dev.lidless.storage;
 
 import dev.lidless.config.SortOrder;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.registries.BuiltInRegistries;
+import dev.lidless.client.GameRegistries;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -34,7 +34,9 @@ public final class StorageActions {
             int kind = indexOf(kinds, stack);
             if (kind < 0) {
                 kind = kinds.size();
-                kinds.add(stack.copyWithCount(1));
+                ItemStack single = stack.copy();
+                single.setCount(1);
+                kinds.add(single);
                 totals.add(0);
             }
             kindOf[i] = kind;
@@ -88,7 +90,7 @@ public final class StorageActions {
 
     private static boolean containsItem(List<ItemStack> stacks, ItemStack stack) {
         for (ItemStack other : stacks) {
-            if (ItemStack.isSameItem(other, stack)) {
+            if (other.is(stack.getItem())) {
                 return true;
             }
         }
@@ -105,14 +107,14 @@ public final class StorageActions {
     }
 
     static Comparator<Integer> comparator(SortOrder order, List<ItemStack> kinds, List<Integer> totals) {
-        Comparator<Integer> category = Comparator.comparingInt(k -> BuiltInRegistries.ITEM.getId(kinds.get(k).getItem()));
+        Comparator<Integer> category = Comparator.comparingInt(k -> GameRegistries.itemId(kinds.get(k).getItem()));
         Comparator<Integer> name = Comparator.comparing(k -> kinds.get(k).getHoverName().getString().toLowerCase(Locale.ROOT));
         return switch (order) {
             case CATEGORY -> category.thenComparing(name);
             case NAME -> name.thenComparing(category);
             case COUNT -> Comparator.<Integer>comparingInt(totals::get).reversed().thenComparing(category);
             case MOD -> Comparator.<Integer, String>comparing(
-                            k -> BuiltInRegistries.ITEM.getKey(kinds.get(k).getItem()).getNamespace())
+                            k -> GameRegistries.itemNamespace(kinds.get(k).getItem()))
                     .thenComparing(category);
         };
     }

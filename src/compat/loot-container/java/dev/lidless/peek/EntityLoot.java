@@ -1,12 +1,18 @@
 package dev.lidless.peek;
 
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.ContainerEntity;
 
-final class EntityLoot {
+public final class EntityLoot {
     private EntityLoot() {
     }
 
-    static boolean pending(ContainerEntity container) {
-        return container.getContainerLootTable() != null;
+    public static Container container(Entity entity) {
+        return entity instanceof ContainerEntity container ? container : null;
+    }
+
+    static boolean pending(Entity entity) {
+        return entity instanceof ContainerEntity container && container.getContainerLootTable() != null;
     }
 }

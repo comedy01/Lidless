@@ -1,6 +1,7 @@
 package dev.lidless.hud;
 
 import dev.lidless.client.LidlessClient;
+import dev.lidless.client.Texts;
 import dev.lidless.config.LidlessConfig;
 import dev.lidless.config.LidlessPolicy;
 import dev.lidless.info.Counts;
@@ -75,12 +76,12 @@ public final class PeekHudRenderer {
                 cells = ItemGrid.slots(target.items());
             }
         } else if (target.status() == PeekTarget.Status.LIVE || target.status() == PeekTarget.Status.REMEMBERED) {
-            note = Component.translatable("lidless.peek.empty");
+            note = Texts.translatable("lidless.peek.empty");
         }
 
         int shown = Math.min(cells.size(), config.rows() * columns);
         if (shown < cells.size()) {
-            note = Component.translatable("lidless.peek.more", cells.size() - shown);
+            note = Texts.translatable("lidless.peek.more", cells.size() - shown);
         }
 
         int headerText = Math.max(font.width(target.title()), status == null ? 0 : font.width(status));
@@ -136,11 +137,11 @@ public final class PeekHudRenderer {
 
     private static Component statusLine(PeekTarget target) {
         return switch (target.status()) {
-            case LIVE -> Component.translatable("lidless.peek.slots", used(target.items()), target.items().size());
-            case REMEMBERED -> Component.translatable("lidless.peek.remembered",
+            case LIVE -> Texts.translatable("lidless.peek.slots", used(target.items()), target.items().size());
+            case REMEMBERED -> Texts.translatable("lidless.peek.remembered",
                     Counts.ago(System.currentTimeMillis() - target.seenAt()));
-            case UNKNOWN -> Component.translatable("lidless.peek.unknown");
-            case LOOT -> Component.translatable("lidless.peek.loot");
+            case UNKNOWN -> Texts.translatable("lidless.peek.unknown");
+            case LOOT -> Texts.translatable("lidless.peek.loot");
         };
     }
 

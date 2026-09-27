@@ -2,6 +2,8 @@ package dev.lidless.storage;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.lidless.client.LidlessClient;
+import dev.lidless.client.Texts;
+import dev.lidless.client.gui.Widgets;
 import dev.lidless.config.LidlessConfig;
 import dev.lidless.hud.Canvas;
 import net.minecraft.ChatFormatting;
@@ -9,7 +11,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -81,24 +82,24 @@ public final class StorageControls {
         playerSortButton = null;
 
         if (!storage.isEmpty() && config.sortButtons()) {
-            Component order = Component.translatable(config.sortOrder().translationKey());
-            sortButton = button("sort", Component.translatable("lidless.button.sort", order),
+            Component order = Texts.translatable(config.sortOrder().translationKey());
+            sortButton = button("sort", Texts.translatable("lidless.button.sort", order),
                     () -> StorageActions.sort(mc, menu, storage, LidlessClient.config().sortOrder()));
-            depositButton = button("deposit", Component.translatable("lidless.button.deposit"),
+            depositButton = button("deposit", Texts.translatable("lidless.button.deposit"),
                     () -> StorageActions.deposit(mc, menu, storage, player));
-            takeButton = button("take", Component.translatable("lidless.button.take"),
+            takeButton = button("take", Texts.translatable("lidless.button.take"),
                     () -> StorageActions.takeAll(mc, menu, storage));
         }
         if (!player.isEmpty() && config.sortButtons()) {
-            Component order = Component.translatable(config.sortOrder().translationKey());
-            playerSortButton = button("sort", Component.translatable("lidless.button.sort_inventory", order),
+            Component order = Texts.translatable(config.sortOrder().translationKey());
+            playerSortButton = button("sort", Texts.translatable("lidless.button.sort_inventory", order),
                     () -> StorageActions.sort(mc, menu, player, LidlessClient.config().sortOrder()));
         }
         if (!storage.isEmpty() && config.searchBox()) {
             Font font = mc.font;
-            search = new EditBox(font, 0, 0, SEARCH_WIDTH, SEARCH_HEIGHT, Component.translatable("lidless.search"));
+            search = Widgets.searchBox(font, SEARCH_WIDTH, SEARCH_HEIGHT, Texts.translatable("lidless.search"),
+                    Texts.translatable("lidless.search.hint").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
             search.setMaxLength(50);
-            search.setHint(Component.translatable("lidless.search.hint").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
             search.setValue(searchText);
             search.setResponder(this::onSearch);
             access.lidless$addWidget(search);
@@ -109,7 +110,6 @@ public final class StorageControls {
 
     private Button button(String sprite, Component label, Runnable action) {
         Button button = IconButtons.create(sprite, label, pressed -> action.run(), BUTTON, ICON);
-        button.setTooltip(Tooltip.create(label));
         access.lidless$addWidget(button);
         return button;
     }
@@ -133,7 +133,7 @@ public final class StorageControls {
             for (Button button : new Button[] {takeButton, depositButton, sortButton}) {
                 if (button != null) {
                     x -= BUTTON;
-                    button.setPosition(x, y);
+                    Widgets.move(button, x, y);
                     x -= GAP;
                 }
             }
@@ -145,12 +145,12 @@ public final class StorageControls {
                 if (width < SEARCH_MIN_WIDTH) {
                     width = SEARCH_WIDTH;
                     if (top >= SEARCH_HEIGHT + 4) {
-                        search.setPosition(right - width, top - SEARCH_HEIGHT - 2);
+                        Widgets.move(search, right - width, top - SEARCH_HEIGHT - 2);
                     } else {
-                        search.setPosition(x - 2 - width, y);
+                        Widgets.move(search, x - 2 - width, y);
                     }
                 } else {
-                    search.setPosition(x - 2 - width, y);
+                    Widgets.move(search, x - 2 - width, y);
                 }
                 search.setWidth(width);
             }
@@ -158,7 +158,7 @@ public final class StorageControls {
 
         if (playerSortButton != null) {
             Slot corner = topRight(player);
-            playerSortButton.setPosition(left + corner.x + 17 - BUTTON, top + corner.y - BUTTON - 2);
+            Widgets.move(playerSortButton, left + corner.x + 17 - BUTTON, top + corner.y - BUTTON - 2);
         }
     }
 
@@ -208,7 +208,7 @@ public final class StorageControls {
         }
         if (search.isFocused()) {
             if (leave) {
-                search.setFocused(false);
+                Widgets.focus(search, false);
                 screen.setFocused(null);
             } else {
                 forward.test(search);
@@ -217,7 +217,7 @@ public final class StorageControls {
         }
         if (key == InputConstants.KEY_F && control) {
             screen.setFocused(search);
-            search.setFocused(true);
+            Widgets.focus(search, true);
             return true;
         }
         return false;
@@ -225,7 +225,7 @@ public final class StorageControls {
 
     public boolean mouseClicked(double x, double y, int button) {
         if (search != null && search.isFocused() && !search.isMouseOver(x, y)) {
-            search.setFocused(false);
+            Widgets.focus(search, false);
             screen.setFocused(null);
         }
         if (button != InputConstants.MOUSE_BUTTON_MIDDLE || !LidlessClient.config().middleClickSort()) {

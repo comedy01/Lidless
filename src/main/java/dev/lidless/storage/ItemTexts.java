@@ -1,6 +1,6 @@
 package dev.lidless.storage;
 
-import net.minecraft.core.registries.BuiltInRegistries;
+import dev.lidless.client.GameRegistries;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -26,13 +26,13 @@ public final class ItemTexts {
     }
 
     private static String namespace(ItemStack stack) {
-        return BuiltInRegistries.ITEM.getKey(stack.getItem()).getNamespace();
+        return GameRegistries.itemNamespace(stack.getItem());
     }
 
     private static List<String> texts(ItemStack stack) {
         List<String> texts = new ArrayList<>(3);
         texts.add(stack.getHoverName().getString());
-        texts.add(BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath());
+        texts.add(GameRegistries.itemPath(stack.getItem()));
         Stacks.addEnchantments(texts, stack);
         return texts;
     }

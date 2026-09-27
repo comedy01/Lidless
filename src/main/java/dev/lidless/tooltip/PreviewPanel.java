@@ -1,5 +1,6 @@
 package dev.lidless.tooltip;
 
+import dev.lidless.client.Texts;
 import dev.lidless.hud.Canvas;
 import dev.lidless.peek.ItemGrid;
 import net.minecraft.client.gui.Font;
@@ -42,7 +43,7 @@ public final class PreviewPanel {
         canvas.fill(x, top, x + width(), top + rows() * ItemGrid.CELL + 1, tint);
         ItemGrid.draw(canvas, font, cells, COLUMNS, shown, x + 1, top + 1, 0x40000000);
         if (shown < cells.size()) {
-            canvas.text(font, Component.translatable("lidless.peek.more", cells.size() - shown),
+            canvas.text(font, Texts.translatable("lidless.peek.more", cells.size() - shown),
                     x, top + rows() * ItemGrid.CELL + 2, NOTE_COLOR, false);
         }
     }

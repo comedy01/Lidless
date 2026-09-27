@@ -42,7 +42,9 @@ public final class ItemGrid {
                 }
             }
             if (found < 0) {
-                kinds.add(stack.copyWithCount(1));
+                ItemStack kind = stack.copy();
+                kind.setCount(1);
+                kinds.add(kind);
                 totals.add(new int[] {stack.getCount()});
             } else {
                 totals.get(found)[0] += stack.getCount();

@@ -1,7 +1,9 @@
 package dev.lidless.selftest;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.lidless.client.GameRegistries;
 import dev.lidless.client.LidlessClient;
+import dev.lidless.client.gui.Widgets;
 import dev.lidless.client.gui.LidlessSettingsScreen;
 import dev.lidless.config.LidlessConfig;
 import dev.lidless.config.LidlessPolicy;
@@ -22,15 +24,12 @@ import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.HasCustomInventoryScreen;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
@@ -288,8 +287,11 @@ public final class LidlessSelfTest {
     }
 
     private static String chestBoat() {
-        boolean split = BuiltInRegistries.ENTITY_TYPE.keySet().stream().anyMatch(id -> id.getPath().equals("oak_chest_boat"));
-        return split ? "oak_chest_boat" : "chest_boat";
+        if (GameRegistries.hasEntityType("oak_chest_boat")) {
+            return "oak_chest_boat";
+        }
+        // Chest boats arrived in 1.19; before that a chest minecart is the only container entity.
+        return GameRegistries.hasEntityType("chest_boat") ? "chest_boat" : "chest_minecart";
     }
 
     private static Entity entityAhead(Minecraft mc) {
@@ -302,7 +304,7 @@ public final class LidlessSelfTest {
         server.execute(() -> {
             ServerPlayer player = server.getPlayerList().getPlayers().get(0);
             Entity entity = server.getLevel(Level.OVERWORLD).getEntity(id);
-            ((HasCustomInventoryScreen) entity).openCustomInventoryScreen(player);
+            ServerCompat.openInventory(entity, player);
         });
     }
 
@@ -358,7 +360,7 @@ public final class LidlessSelfTest {
         });
         then(15, () -> {
             check(mc.hitResult instanceof BlockHitResult, "not looking at the chest");
-            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, (BlockHitResult) mc.hitResult);
+            ServerCompat.useBlock(mc, (BlockHitResult) mc.hitResult);
         });
         when(() -> Screens.current(mc) instanceof ContainerScreen, () -> log("chest open"));
         then(5, () -> {
@@ -449,7 +451,7 @@ public final class LidlessSelfTest {
             Screen screen = Screens.current(mc);
             Button reset = findButton(screen, "lidless.options.reset");
             check(reset != null, "no reset button");
-            Ui.click(screen, reset.getX() + reset.getWidth() / 2.0, reset.getY() + reset.getHeight() / 2.0);
+            Ui.click(screen, Widgets.x(reset) + reset.getWidth() / 2.0, Widgets.y(reset) + reset.getHeight() / 2.0);
         });
         then(5, () -> {
             LidlessConfig config = LidlessClient.config();
@@ -463,7 +465,7 @@ public final class LidlessSelfTest {
             Screen screen = Screens.current(mc);
             AbstractSliderButton slider = findSlider(screen, "Vertical");
             check(slider != null, "no vertical slider");
-            Ui.click(screen, slider.getX() + slider.getWidth() - 2.0, slider.getY() + slider.getHeight() / 2.0);
+            Ui.click(screen, Widgets.x(slider) + slider.getWidth() - 2.0, Widgets.y(slider) + slider.getHeight() / 2.0);
         });
         then(5, () -> {
             LidlessConfig config = LidlessClient.config();
@@ -479,7 +481,7 @@ public final class LidlessSelfTest {
 
     private static void run(Minecraft mc, String command) {
         IntegratedServer server = mc.getSingleplayerServer();
-        server.execute(() -> server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), command));
+        server.execute(() -> ServerCompat.runCommand(server, command));
     }
 
     private static void screenshot(Minecraft mc, String name) {
@@ -492,7 +494,7 @@ public final class LidlessSelfTest {
         Screen screen = Screens.current(mc);
         AbstractWidget button = findWidget(screen, key);
         check(button != null, "no button " + key);
-        Ui.click(screen, button.getX() + button.getWidth() / 2.0, button.getY() + button.getHeight() / 2.0);
+        Ui.click(screen, Widgets.x(button) + button.getWidth() / 2.0, Widgets.y(button) + button.getHeight() / 2.0);
     }
 
     private static boolean hasButton(Screen screen, String key) {
@@ -502,8 +504,7 @@ public final class LidlessSelfTest {
     private static AbstractWidget findWidget(Screen screen, String key) {
         for (GuiEventListener child : screen.children()) {
             if (child instanceof AbstractWidget widget
-                    && widget.getMessage().getContents() instanceof TranslatableContents contents
-                    && contents.getKey().equals(key)) {
+                    && key.equals(TextKeys.key(widget.getMessage()))) {
                 return widget;
             }
         }
@@ -512,8 +513,7 @@ public final class LidlessSelfTest {
 
     private static Button findButton(GuiEventListener node, String key) {
         if (node instanceof Button button
-                && button.getMessage().getContents() instanceof TranslatableContents contents
-                && contents.getKey().equals(key)) {
+                && key.equals(TextKeys.key(button.getMessage()))) {
             return button;
         }
         if (node instanceof ContainerEventHandler container) {
@@ -563,7 +563,7 @@ public final class LidlessSelfTest {
 
     private static List<String> expectedSort() {
         List<Item> order = new ArrayList<>(List.of(Items.STICK, Items.DIRT, Items.COBBLESTONE, Items.DIAMOND));
-        order.sort((a, b) -> Integer.compare(BuiltInRegistries.ITEM.getId(a), BuiltInRegistries.ITEM.getId(b)));
+        order.sort((a, b) -> Integer.compare(GameRegistries.itemId(a), GameRegistries.itemId(b)));
         List<String> out = new ArrayList<>();
         for (Item item : order) {
             int total = item == Items.STICK ? 30 : item == Items.DIRT ? 70 : item == Items.COBBLESTONE ? 50 : 2;
@@ -575,7 +575,7 @@ public final class LidlessSelfTest {
     }
 
     private static String name(Item item) {
-        return BuiltInRegistries.ITEM.getKey(item).getPath();
+        return GameRegistries.itemPath(item);
     }
 
     private static List<String> serverContents(Minecraft mc) {
