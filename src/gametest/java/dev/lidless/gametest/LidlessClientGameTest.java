@@ -202,7 +202,8 @@ public class LidlessClientGameTest implements FabricClientGameTest {
 
     private static void checkChestScreen(ClientGameTestContext context, TestSingleplayerContext world) {
         world.getServer().runCommand("setblock 0 -59 3 chest[facing=north]{Items:["
-                + "{Slot:0b,id:\"minecraft:stick\",count:10},"
+                + "{Slot:0b,id:\"minecraft:bundle\",count:1},"
+                + "{Slot:1b,id:\"minecraft:stick\",count:10},"
                 + "{Slot:3b,id:\"minecraft:dirt\",count:30},"
                 + "{Slot:7b,id:\"minecraft:cobblestone\",count:50},"
                 + "{Slot:9b,id:\"minecraft:stick\",count:20},"
@@ -222,6 +223,7 @@ public class LidlessClientGameTest implements FabricClientGameTest {
         context.waitTicks(10);
         List<String> sorted = serverContents(context, world);
         log("after sort: " + sorted);
+        sorted.removeIf(stack -> stack.endsWith(" bundle"));
         check(sorted.equals(expectedSort(context)), "unexpected sort result: " + sorted);
         log("screenshot: " + context.takeScreenshot("lidless-chest-sorted"));
 

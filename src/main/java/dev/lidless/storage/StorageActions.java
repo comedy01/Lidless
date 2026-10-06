@@ -16,8 +16,13 @@ public final class StorageActions {
     private StorageActions() {
     }
 
-    public static void sort(Minecraft mc, AbstractContainerMenu menu, List<Slot> section, SortOrder order) {
-        if (!ready(mc, menu) || section.isEmpty()) {
+    public static void sort(Minecraft mc, AbstractContainerMenu menu, List<Slot> slots, SortOrder order) {
+        if (!ready(mc, menu)) {
+            return;
+        }
+        List<Slot> section = new ArrayList<>(slots);
+        section.removeIf(slot -> Stacks.takesClicks(slot.getItem()));
+        if (section.isEmpty()) {
             return;
         }
         List<ItemStack> kinds = new ArrayList<>();

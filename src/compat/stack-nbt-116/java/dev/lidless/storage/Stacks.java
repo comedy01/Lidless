@@ -22,6 +22,10 @@ public final class Stacks {
         return ItemStack.isSame(a, b) && ItemStack.tagMatches(a, b);
     }
 
+    static boolean takesClicks(ItemStack stack) {
+        return false;
+    }
+
     public static boolean hasContents(ItemStack stack) {
         List<ItemStack> items = new ArrayList<>();
         addItems(items, stack.getTagElement("BlockEntityTag"));

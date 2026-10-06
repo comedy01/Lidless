@@ -20,6 +20,10 @@ public final class Stacks {
         return ItemStack.isSameItemSameComponents(a, b);
     }
 
+    static boolean takesClicks(ItemStack stack) {
+        return false;
+    }
+
     public static boolean hasContents(ItemStack stack) {
         return hasContents(stack.get(DataComponents.CONTAINER));
     }

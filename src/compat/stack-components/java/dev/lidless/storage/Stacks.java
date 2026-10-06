@@ -3,6 +3,7 @@ package dev.lidless.storage;
 import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.item.component.ItemContainerContents;
@@ -17,6 +18,10 @@ public final class Stacks {
 
     public static boolean same(ItemStack a, ItemStack b) {
         return ItemStack.isSameItemSameComponents(a, b);
+    }
+
+    static boolean takesClicks(ItemStack stack) {
+        return stack.getItem() instanceof BundleItem;
     }
 
     public static boolean hasContents(ItemStack stack) {

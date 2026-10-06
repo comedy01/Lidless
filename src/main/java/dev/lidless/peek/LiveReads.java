@@ -19,6 +19,7 @@ final class LiveReads<T> {
         if (current != server) {
             server = current;
             results.clear();
+            pending.clear();
         }
         if (pending.add(key)) {
             if (results.size() > MAX_ENTRIES) {

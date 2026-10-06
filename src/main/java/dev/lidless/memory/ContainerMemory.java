@@ -96,13 +96,19 @@ public final class ContainerMemory {
         try (Reader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
             JsonObject root = GSON.fromJson(reader, JsonObject.class);
             for (Map.Entry<String, JsonElement> entry : root.entrySet()) {
-                JsonObject value = entry.getValue().getAsJsonObject();
-                int size = value.has("size") ? value.get("size").getAsInt() : 0;
-                NonNullList<ItemStack> items = NonNullList.withSize(size, ItemStack.EMPTY);
-                codec.readItems(value.get("items"), items);
-                Component title = value.has("title") ? codec.readTitle(value.get("title")) : null;
-                long seen = value.has("seen") ? value.get("seen").getAsLong() : 0L;
-                entries.put(entry.getKey(), new Remembered(title, items, seen));
+                try {
+                    JsonObject value = entry.getValue().getAsJsonObject();
+                    int size = value.has("size") ? value.get("size").getAsInt() : 0;
+                    NonNullList<ItemStack> items = NonNullList.withSize(size, ItemStack.EMPTY);
+                    if (value.has("items")) {
+                        codec.readItems(value.get("items"), items);
+                    }
+                    Component title = value.has("title") ? codec.readTitle(value.get("title")) : null;
+                    long seen = value.has("seen") ? value.get("seen").getAsLong() : 0L;
+                    entries.put(entry.getKey(), new Remembered(title, items, seen));
+                } catch (RuntimeException e) {
+                    LOGGER.warn("Skipping unreadable container memory entry {}: {}", entry.getKey(), e.toString());
+                }
             }
         } catch (IOException | RuntimeException e) {
             LOGGER.warn("Could not read container memory {}: {}", file, e.toString());

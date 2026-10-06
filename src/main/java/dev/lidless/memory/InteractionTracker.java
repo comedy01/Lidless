@@ -78,7 +78,7 @@ public final class InteractionTracker {
 
     private static List<String> keysFor(Minecraft mc, AbstractContainerMenu menu) {
         ClientLevel level = mc.level;
-        if (level == null) {
+        if (level == null || mc.player == null || menu == mc.player.inventoryMenu) {
             return List.of();
         }
         if (Mounts.isMountMenu(menu)) {

@@ -348,7 +348,8 @@ public final class LidlessSelfTest {
     private void planChestScreen(Minecraft mc) {
         then(0, () -> {
             run(mc, "setblock 0 " + (floor + 1) + " 3 chest[facing=north]{Items:["
-                    + Fixtures.item(0, "stick", 10) + ","
+                    + Fixtures.item(0, "bundle", 1) + ","
+                    + Fixtures.item(1, "stick", 10) + ","
                     + Fixtures.item(3, "dirt", 30) + ","
                     + Fixtures.item(7, "cobblestone", 50) + ","
                     + Fixtures.item(9, "stick", 20) + ","
@@ -370,6 +371,7 @@ public final class LidlessSelfTest {
         then(10, () -> {
             List<String> sorted = serverContents(mc);
             log("after sort: " + sorted);
+            sorted.removeIf(stack -> stack.endsWith(" bundle"));
             check(sorted.equals(expectedSort()), "unexpected sort result: " + sorted);
             Screen screen = Screens.current(mc);
             Ui.key(screen, Ui.KEY_F, Ui.MOD_CONTROL);
