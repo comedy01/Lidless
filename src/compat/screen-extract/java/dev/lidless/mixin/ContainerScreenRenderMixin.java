@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(AbstractContainerScreen.class)
 public abstract class ContainerScreenRenderMixin {
-    @Inject(method = "extractRenderState", at = @At("HEAD"))
+    @Inject(method = "extractContents", at = @At("HEAD"))
     private void lidless$layout(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, CallbackInfo ci) {
         StorageControls controls = ((ContainerScreenAccess) this).lidless$controls();
         if (controls != null) {
