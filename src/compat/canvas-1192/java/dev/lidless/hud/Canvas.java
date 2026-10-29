@@ -19,7 +19,6 @@ public final class Canvas {
         this(pose, 0);
     }
 
-    // Tooltip images draw at the tooltip's blit offset instead of a translated pose.
     public Canvas(PoseStack pose, int base) {
         this.pose = pose;
         this.base = base;

@@ -290,7 +290,6 @@ public final class LidlessSelfTest {
         if (GameRegistries.hasEntityType("oak_chest_boat")) {
             return "oak_chest_boat";
         }
-        // Chest boats arrived in 1.19; before that a chest minecart is the only container entity.
         return GameRegistries.hasEntityType("chest_boat") ? "chest_boat" : "chest_minecart";
     }
 

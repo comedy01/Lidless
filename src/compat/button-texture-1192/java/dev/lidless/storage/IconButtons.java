@@ -18,7 +18,6 @@ public final class IconButtons {
     private IconButtons() {
     }
 
-    // Container screens draw slots after widgets, so the tooltip waits for the end of the frame.
     public static void renderPendingTooltip(PoseStack poseStack) {
         if (pendingTooltip != null && Minecraft.getInstance().screen != null) {
             Minecraft.getInstance().screen.renderTooltip(poseStack, pendingTooltip, pendingX, pendingY);
@@ -47,7 +46,6 @@ public final class IconButtons {
 
         @Override
         public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-            // Draw the plain button without its label, then the icon on top.
             Component message = getMessage();
             setMessage(Texts.empty());
             super.renderButton(poseStack, mouseX, mouseY, partialTick);

@@ -23,7 +23,6 @@ public final class Widgets {
         widget.y = y;
     }
 
-    // EditBox has no hint before 1.19.3, so draw it while the box is empty.
     public static EditBox searchBox(Font font, int width, int height, Component label, Component hint) {
         return new EditBox(font, 0, 0, width, height, label) {
             @Override

@@ -42,7 +42,6 @@ abstract class OptionsPage extends Screen {
         y += 24;
     }
 
-    // Widgets have no tooltip of their own before 1.19.3, so the page draws them.
     <T extends AbstractWidget> T tooltip(T widget, Component tooltip) {
         tooltips.put(widget, tooltip);
         return widget;

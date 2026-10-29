@@ -135,7 +135,6 @@ if (neoforge) {
 
 	legacyForge {
 		if (versionProps.getProperty("neoforge_version") != null) {
-			// NeoForge 1.20.1 is a Forge fork; only used to launch-check the Forge 1.20.1 code there
 			enable { neoForgeVersion = versionProps.getProperty("neoforge_version") }
 		} else {
 			version = versionProps.getProperty("forge_version")

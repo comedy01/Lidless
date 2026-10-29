@@ -44,7 +44,6 @@ final class Fixtures {
         return stack.getTooltipLines(mc.player, normalFlag());
     }
 
-    // NORMAL moved from TooltipFlag.Default to TooltipFlag in 1.19.3; the self-test only runs in dev.
     private static TooltipFlag normalFlag() {
         try {
             try {

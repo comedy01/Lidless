@@ -6,7 +6,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
 import net.minecraft.world.item.ItemStack;
 
-// Before 1.19 only container minecarts hold items, and their loot table has no getter.
 public final class EntityLoot {
     private EntityLoot() {
     }
